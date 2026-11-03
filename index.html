@@ -247,7 +247,13 @@
   .trend.flat { background: var(--surface-2); color: var(--muted); }
   .syn-d { margin-top: 4px; }
   .cmp-ex { margin: 10px 0 6px; }
-  .cmp-name { font-weight: 700; font-size: .95rem; color: var(--text); margin-bottom: 4px; }
+  .cmp-name { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .95rem; color: var(--text); margin-bottom: 4px; }
+  .cmp-name .thumb { width: 44px; height: 44px; }
+  .cmp-name span { min-width: 0; }
+  .hist summary { flex-wrap: wrap; }
+  .minis { flex: 0 0 100%; box-sizing: border-box; padding-left: 22px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+  .minis .thumb { width: 30px; height: 30px; border-radius: 8px; }
+  .minis .more { font-size: .72rem; color: var(--muted); font-weight: 700; margin-left: 2px; }
   .cmp-row { display: grid; grid-template-columns: 22px 1fr 1fr 84px; gap: 8px; align-items: baseline; padding: 5px 0; font-size: .82rem; font-variant-numeric: tabular-nums; }
   .cmp-row.nop { grid-template-columns: 22px 1fr; }
   .cmp-row.head { color: var(--muted); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
@@ -1642,8 +1648,7 @@
       body.append(ui.confirm === delKey
         ? h("button", { class: "btn mini danger", type: "button", onclick: () => { const i = p.history.indexOf(r); if (i >= 0) p.history.splice(i, 1); ui.confirm = null; saveData(); rerender(); } }, "Confirmer la suppression")
         : h("button", { class: "btn mini", type: "button", onclick: () => { ui.confirm = delKey; rerender(); } }, "Supprimer cette séance"));
-      const d = h("details", { class: "hist" },
-        h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") })), body);
+      const d = h("details", { class: "hist" }, histSummary(r), body);
       if (ui.confirm === delKey) d.open = true;
       card.append(d);
     });
@@ -1669,6 +1674,20 @@
     return { cls: "flat", t: "＝" };
   }
   // Pour chaque exercice de la séance r : séries (poids × reps) face à la dernière séance où il apparaît
+  // vignette d'un exercice d'une séance passée (même si l'exercice a été retiré de la base : on garde son nom, et sa photo s'il en a une)
+  function histThumb(it) { return thumb(exInfo(it.id) || { id: it.id, name: it.name, cats: [it.cat || ""] }); }
+  // ligne de résumé d'une séance : titre, durée, et une rangée de miniatures des exercices faits
+  function histSummary(r) {
+    const th = (r.items || []).filter((it) => it.log && it.log.length).map(histThumb).filter(Boolean);
+    const sm = h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") }));
+    if (th.length) {
+      const MAX = 7; const strip = h("div", { class: "minis" }, th.slice(0, MAX));
+      if (th.length > MAX) strip.append(h("span", { class: "more", text: "+" + (th.length - MAX) }));
+      sm.append(strip);
+    }
+    return sm;
+  }
+
   function compareEl(hist, r) {
     const idx = hist.indexOf(r);
     const wrap = h("div", { class: "cmp" });
@@ -1680,7 +1699,7 @@
         const pi = (hist[i].items || []).find((x) => x.id === it.id && x.log && x.log.length);
         if (pi) { prev = pi.log; pdate = hist[i].date; break; }
       }
-      const blk = h("div", { class: "cmp-ex" }, h("div", { class: "cmp-name", text: it.name }));
+      const blk = h("div", { class: "cmp-ex" }, h("div", { class: "cmp-name" }, histThumb(it), h("span", { text: it.name })));
       blk.append(prev
         ? h("div", { class: "cmp-row head" }, h("span", { text: "Série" }), h("span", { text: "Cette séance" }), h("span", { text: "Avant · " + dshort(pdate) }), h("span", { style: "text-align:right", text: "Écart" }))
         : h("div", { class: "cmp-row nop head" }, h("span", { text: "Série" }), h("span", { text: "Cette séance · première fois" })));
@@ -1824,8 +1843,7 @@
     else {
       syn.append(h("p", { class: "muted small", style: "margin:-4px 2px 10px", text: "Touchez une séance pour déplier ses séries." }));
       inWeek.slice().reverse().forEach((r, k) => {
-        const d = h("details", { class: "hist" },
-          h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") })),
+        const d = h("details", { class: "hist" }, histSummary(r),
           h("div", { class: "hb" }, compareEl(hist, r)));
         if (k === 0) d.open = true;
         syn.append(d);
@@ -1844,7 +1862,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "3 nov. 2026 · 20:33 · a22d44"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "3 nov. 2026 · 20:46 · 197283"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
