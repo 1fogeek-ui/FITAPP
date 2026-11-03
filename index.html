@@ -299,17 +299,21 @@
   .trow.has { opacity: .75; }
   .trow.has .tg { color: var(--muted); }
   .trow:disabled { cursor: default; }
-  /* Menu du bas : barre flottante arrondie, icônes illustrées, onglet actif en vert */
-  main { padding-bottom: 140px; }
-  .tabs { left: 10px; right: 10px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 540px; margin: 0 auto; gap: 0; padding: 8px 6px 10px; border: 1px solid rgba(130,160,210,.28); border-radius: 30px; background: linear-gradient(180deg, #0f1424, #090c18); box-shadow: 0 10px 30px rgba(0,0,0,.55); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .tabs button { position: relative; max-width: none; padding: 4px 2px 12px; gap: 2px; font-size: .74rem; font-weight: 700; color: #aeb8cc; border-radius: 18px; }
-  .tabs button + button::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 34%; width: 1px; background: rgba(140,160,200,.16); }
-  .tabs .ni { width: 44px; height: 44px; object-fit: contain; opacity: .88; pointer-events: none; transition: transform .15s, opacity .15s, filter .15s; }
+  /* Menu du bas : barre collée au bas de l'écran, petites icônes illustrées, onglet actif en vert */
+  main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .tabs { left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; gap: 0; padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)); border: 1px solid rgba(130,160,210,.28); border-bottom: 0; border-radius: 22px 22px 0 0; background: linear-gradient(180deg, #0f1424, #090c18); box-shadow: 0 -6px 22px rgba(0,0,0,.45); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .tabs button { position: relative; max-width: none; padding: 2px 2px 8px; gap: 1px; font-size: .68rem; font-weight: 700; color: #aeb8cc; border-radius: 14px; }
+  .tabs button + button::before { content: ""; position: absolute; left: 0; top: 14%; bottom: 36%; width: 1px; background: rgba(140,160,200,.16); }
+  .tabs .ni { width: 30px; height: 30px; object-fit: contain; opacity: .88; pointer-events: none; transition: transform .15s, opacity .15s, filter .15s; }
   .tabs button[aria-current="page"] { color: #fff; }
-  .tabs button[aria-current="page"] .ni { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 8px rgba(205,240,120,.5)); }
-  .tabs button[aria-current="page"]::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: 2px; height: 5px; border-radius: 4px; background: var(--accent); box-shadow: 0 0 10px rgba(205,240,120,.55); }
-  .toast { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+  .tabs button[aria-current="page"] .ni { opacity: 1; transform: scale(1.08); filter: drop-shadow(0 0 6px rgba(205,240,120,.5)); }
+  .tabs button[aria-current="page"]::after { content: ""; position: absolute; left: 26%; right: 26%; bottom: 1px; height: 4px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 8px rgba(205,240,120,.55); }
+  .toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
   .diag { white-space: pre-wrap; overflow-wrap: anywhere; font: .74rem/1.45 ui-monospace, Menlo, Consolas, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; color: var(--muted); user-select: text; -webkit-user-select: text; }
+  .wk { display: flex; gap: 8px; align-items: center; }
+  .wk select { flex: 1; min-width: 0; }
+  .wkb { width: 46px; height: 46px; flex: none; border-radius: 14px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); font-size: 1.5rem; font-weight: 700; line-height: 1; }
+  .wkb:disabled { opacity: .3; }
   select.field { appearance: none; -webkit-appearance: none; }
 </style>
 </head>
@@ -396,11 +400,11 @@
 </main>
 
 <nav class="tabs" id="tabs" aria-label="Navigation" hidden>
-  <button type="button" data-tab="seance" aria-current="page"><img class="ni" data-nav="seance" alt="" width="44" height="44" draggable="false">Séance</button>
-  <button type="button" data-tab="list"><img class="ni" data-nav="seances" alt="" width="44" height="44" draggable="false">Séances</button>
-  <button type="button" data-tab="lib"><img class="ni" data-nav="exercices" alt="" width="44" height="44" draggable="false">Exercices</button>
-  <button type="button" data-tab="prog"><img class="ni" data-nav="progres" alt="" width="44" height="44" draggable="false">Progrès</button>
-  <button type="button" data-tab="profile"><img class="ni" data-nav="profil" alt="" width="44" height="44" draggable="false">Profil</button>
+  <button type="button" data-tab="seance" aria-current="page"><img class="ni" data-nav="seance" alt="" width="30" height="30" draggable="false">Séance</button>
+  <button type="button" data-tab="list"><img class="ni" data-nav="seances" alt="" width="30" height="30" draggable="false">Séances</button>
+  <button type="button" data-tab="lib"><img class="ni" data-nav="exercices" alt="" width="30" height="30" draggable="false">Exercices</button>
+  <button type="button" data-tab="prog"><img class="ni" data-nav="progres" alt="" width="30" height="30" draggable="false">Progrès</button>
+  <button type="button" data-tab="profile"><img class="ni" data-nav="profil" alt="" width="30" height="30" draggable="false">Profil</button>
 </nav>
 
 <div class="overlay" id="overlay" hidden>
@@ -421,21 +425,21 @@
      nom est conservé comme repère « à surveiller ».
      ===================================================================== */
   const BASE = {"categories":[
-    {"name":"Pectoraux","exercises":["Développé couché barre","Développé couché haltères","Développé couché machine","Développé incliné barre","Développé incliné haltères","Développé incliné machine","Développé décliné barre","Développé décliné haltères","Chest press machine","Pec deck","Butterfly machine","Écarté haltères","Écarté incliné haltères","Écarté poulie vis-à-vis","Écarté poulie haute","Écarté poulie basse","Écarté poulie unilatéral","Poulie vis-à-vis basse vers haute","Poulie vis-à-vis haute vers basse","Pompes classiques","Pompes inclinées","Pompes déclinées","Dips penchés"]},
-    {"name":"Dos","exercises":["Tractions pronation","Tractions supination","Tractions prise neutre","Tractions assistées machine","Tirage vertical devant","Tirage vertical prise large","Tirage vertical prise serrée","Tirage vertical prise neutre","Tirage vertical unilatéral","Tirage horizontal machine","Tirage horizontal poulie","Rowing barre","Rowing haltère unilatéral","Rowing T-bar","Rowing machine convergente","Rowing poitrine appuyée","Rowing poulie basse","Rowing poulie haute","Rowing poulie unilatéral","Pullover haltère","Pullover poulie haute","Pullover machine","Tirage bras tendus poulie","Soulevé de terre classique !","Soulevé de terre roumain !","Extensions lombaires","Machine lombaires"]},
-    {"name":"Épaules","exercises":["Développé militaire barre","Développé militaire haltères","Développé épaules machine","Développé Arnold","Développé épaules Smith machine","Élévations latérales haltères","Élévations latérales poulie","Élévations latérales machine","Élévations latérales unilatérales poulie","Élévations frontales haltères","Élévations frontales barre","Élévations frontales poulie","Oiseau haltères","Oiseau machine","Oiseau poulie","Face pull poulie","Tirage menton barre","Tirage menton poulie","Rotation externe poulie","Rotation externe élastique"]},
-    {"name":"Biceps","exercises":["Curl barre droite","Curl barre EZ","Curl haltères","Curl alterné haltères","Curl marteau","Curl marteau corde poulie","Curl incliné haltères","Curl concentré","Curl pupitre barre","Curl pupitre haltères","Curl machine pupitre","Curl poulie basse barre","Curl poulie basse corde","Curl poulie unilatéral","Curl poulie haute","Curl Bayesian poulie","Curl inversé barre","Curl inversé poulie"]},
-    {"name":"Triceps","exercises":["Extension triceps poulie haute corde","Extension triceps poulie haute barre","Extension triceps poulie haute unilatérale","Pushdown triceps","Pushdown prise inversée","Extension triceps au-dessus de la tête poulie","Extension triceps corde derrière la tête","Extension triceps haltère unilatérale","Extension triceps haltère deux mains","Barre au front","Barre au front haltères","Développé couché prise serrée","Dips triceps !","Kickback haltère","Kickback poulie","Extension triceps machine","Pompes diamant"]},
-    {"name":"Quadriceps","exercises":["Presse à cuisses","Presse à cuisses unilatérale","Presse à cuisses inclinée","Presse à cuisses horizontale","Squat barre !","Squat Smith machine","Goblet squat","Squat sumo","Front squat !","Hack squat !","Squat bulgare !","Fentes avant","Fentes marchées","Fentes arrière","Fentes Smith machine","Leg extension","Leg extension unilatérale","Sissy squat !","Step-up","Wall sit"]},
-    {"name":"Ischio-jambiers","exercises":["Leg curl assis","Leg curl couché","Leg curl debout","Leg curl unilatéral","Soulevé de terre roumain !","Soulevé de terre roumain Smith machine","Soulevé de terre jambes tendues !","Good morning !","Nordic curl !","Glute ham raise","Pull through poulie","Extension de hanche banc"]},
-    {"name":"Fessiers","exercises":["Hip thrust barre","Hip thrust machine","Hip thrust Smith machine","Glute bridge","Glute bridge machine","Soulevé de terre classique !","Soulevé de terre roumain !","Soulevé de terre roumain Smith machine","Soulevé de terre jambes tendues !","Good morning !","Kickback poulie","Kickback machine","Kickback élastique","Kickback au sol","Abduction machine","Abduction poulie","Abduction élastique","Adduction machine","Squat sumo","Squat bulgare","Fentes arrière","Fentes marchées","Fentes latérales","Step-up banc","Presse à cuisses pieds hauts","Presse à cuisses pieds écartés","Pull through poulie","Extension de hanche banc","Fire hydrant","Donkey kicks","Clamshell","Squat barre !","Squat Smith machine","Goblet squat","Front squat !","Hack squat !","Presse à cuisses","Presse à cuisses unilatérale","Presse à cuisses inclinée","Presse à cuisses horizontale","Fentes avant","Fentes Smith machine","Step-up","Glute ham raise","Extensions lombaires"]},
-    {"name":"Mollets","exercises":["Mollets debout machine","Mollets assis machine","Mollets à la presse","Mollets debout Smith machine","Mollets haltères","Mollets unilatéraux","Mollets sur marche","Mollets donkey machine","Mollets à la machine hack squat"]},
-    {"name":"Abdominaux","exercises":["Crunch au sol","Crunch machine","Crunch poulie haute","Crunch inversé","Relevé de jambes suspendu","Relevé de genoux suspendu","Relevé de jambes au sol","Gainage classique","Gainage latéral","Gainage dynamique","Abdominal wheel !","Russian twist","Mountain climbers","Dead bug","Hollow body hold","Pallof press poulie","Rotation du buste poulie","Woodchopper poulie"]},
-    {"name":"Avant-bras","exercises":["Curl poignets barre","Extension poignets barre","Curl poignets haltères","Curl inversé barre","Curl inversé haltères","Curl inversé poulie","Farmer walk","Wrist roller","Gripper"]},
-    {"name":"Cardio - Tapis","exercises":["Marche sur tapis","Marche inclinée","Course sur tapis","Course fractionnée tapis","Sprint tapis !","Marche rapide tapis","Marche récupération tapis"]},
-    {"name":"Cardio - Escaliers","exercises":["Stair climber","Escalier mécanique fitness","Stepper","Montée d’escaliers","Montée d’escaliers fractionnée"]},
-    {"name":"Cardio - Machines","exercises":["Vélo elliptique","Vélo d’appartement","Vélo spinning","Rameur","Air bike","Ski erg","Assault bike"]},
-    {"name":"Cardio - Autres","exercises":["Corde à sauter","Marche rapide extérieure","Course extérieure","Sprint extérieur !","Burpees","Jumping jacks","Step aérobique"]}
+    {"name":"Pectoraux","exercises":["Développé couché machine","Développé incliné barre","Chest press machine","Pec deck","Butterfly machine","Écarté poulie vis-à-vis"]},
+    {"name":"Dos","exercises":["Tractions assistées machine","Tirage vertical devant","Tirage vertical prise large","Tirage horizontal poulie","Rowing barre","Rowing machine convergente","Rowing poulie basse","Tirage bras tendus poulie","Soulevé de terre roumain !","Extensions lombaires"]},
+    {"name":"Épaules","exercises":["Développé épaules machine","Élévations latérales unilatérales poulie","Oiseau machine","Face pull poulie","Tirage menton barre"]},
+    {"name":"Biceps","exercises":["Curl barre EZ","Curl machine pupitre","Curl poulie basse barre"]},
+    {"name":"Triceps","exercises":["Extension triceps poulie haute corde","Pushdown triceps","Dips triceps !","Extension triceps machine"]},
+    {"name":"Quadriceps","exercises":["Presse à cuisses","Presse à cuisses horizontale","Leg extension"]},
+    {"name":"Ischio-jambiers","exercises":["Leg curl couché","Soulevé de terre roumain !","Soulevé de terre roumain Smith machine"]},
+    {"name":"Fessiers","exercises":["Hip thrust barre","Hip thrust machine","Soulevé de terre roumain !","Soulevé de terre roumain Smith machine","Kickback poulie","Abduction machine","Adduction machine","Presse à cuisses","Presse à cuisses horizontale","Extensions lombaires"]},
+    {"name":"Mollets","exercises":[]},
+    {"name":"Abdominaux","exercises":["Gainage classique"]},
+    {"name":"Avant-bras","exercises":[]},
+    {"name":"Cardio - Tapis","exercises":[]},
+    {"name":"Cardio - Escaliers","exercises":["Stair climber"]},
+    {"name":"Cardio - Machines","exercises":[]},
+    {"name":"Cardio - Autres","exercises":[]}
   ]};
 
   /* Photos par défaut (vos 15 images) : une entrée par exercice. Pour en ajouter, on ajoute une ligne « id: image ». */
@@ -650,7 +654,7 @@
   ]; // « Avant-bras » n'a plus de bouton : ses exercices restent dans « Tout » et la recherche
   function chipLabels() {
     const real = allCats(); const labels = [];
-    GROUPS.forEach((g) => { if (g.cats.some((c) => real.indexOf(c) >= 0)) labels.push(g.label); });
+    GROUPS.forEach((g) => { if (g.cats.some((c) => real.indexOf(c) >= 0) && chipExercises(g.label).length > 0) labels.push(g.label); });
     real.forEach((c) => { if (BASE_CATS.indexOf(c) < 0 && labels.indexOf(c) < 0) labels.push(c); }); // catégories créées par vous
     labels.push("Tout");
     return labels;
@@ -704,7 +708,7 @@
   }
 
   /* ---------- Navigateur d’exercices (onglet + sélecteur) ---------- */
-  const ui = { tab: "seance", lib: { cat: null, q: "" }, pick: { cat: null, q: "" }, sess: { cat: null, q: "" }, draft: null, list: { seg: "" }, prog: { seg: "ex", exId: null, metric: "maxW", gmetric: "presence" }, confirm: null };
+  const ui = { tab: "seance", lib: { cat: null, q: "" }, pick: { cat: null, q: "" }, sess: { cat: null, q: "" }, draft: null, list: { seg: "" }, prog: { seg: "ex", week: null, exId: null, metric: "maxW", gmetric: "presence" }, confirm: null };
 
   function browser(state, onTap, selOf, ctx) {
     const search = h("input", { class: "field", type: "search", placeholder: "Rechercher un exercice", "aria-label": "Rechercher un exercice", value: state.q || "" });
@@ -1549,10 +1553,10 @@
     progEx(root, hist);
   }
 
-  function totalsCard(p, hist) {
-    const pres = hist.reduce((a, r) => a + (r.presence || 0), 0), sets = hist.reduce((a, r) => a + (r.sets || 0), 0);
-    return h("section", { class: "card" }, h("h3", { text: "Totaux · " + p.name }),
-      h("div", { class: "hb2" }, kv("Séances", String(hist.length)), kv("Séries", String(sets)), kv("Temps de présence", fmtLong(pres))));
+  function totalsCard(p, hist, title) {
+    const pres = hist.reduce((a, r) => a + (r.presence || 0), 0), exo = hist.reduce((a, r) => a + (r.ex || 0), 0), sets = hist.reduce((a, r) => a + (r.sets || 0), 0);
+    return h("section", { class: "card" }, h("h3", { text: title || "Totaux · " + p.name }),
+      h("div", { class: "hb2" }, kv("Séances", String(hist.length)), kv("Séries", String(sets)), kv("Temps de présence", fmtLong(pres)), kv("Temps d’exercice", fmtLong(exo))));
   }
 
   function histCard(p, hist, rerender) {
@@ -1696,18 +1700,44 @@
     root.append(tab);
   }
 
+  // Semaines du lundi au dimanche
+  const weekStartOf = (ts) => { const d = new Date(ts); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); };
+  const shiftWeek = (ws, k) => { const d = new Date(ws); d.setDate(d.getDate() + 7 * k); return d.getTime(); };
+  const weekLabel = (ws) => {
+    const a = new Date(ws), b = new Date(shiftWeek(ws, 1) - 1);
+    return a.toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + " – " + b.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+  };
+
   function progAll(root, hist) {
-    root.append(totalsCard(prof(), hist));
-    const last = hist.slice(-8).reverse();
-    const syn = h("section", { class: "card" }, h("h3", { text: "Séances · comparaison avec la précédente" }));
-    syn.append(h("p", { class: "muted small", style: "margin:-4px 2px 10px", text: "Touchez une séance pour déplier ses séries." }));
-    last.forEach((r, k) => {
-      const d = h("details", { class: "hist" },
-        h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") })),
-        h("div", { class: "hb" }, compareEl(hist, r)));
-      if (k === 0) d.open = true;
-      syn.append(d);
-    });
+    const p = prof(); const st = ui.prog;
+    const weeksWith = [...new Set(hist.map((r) => weekStartOf(r.date)))].sort((a, b) => b - a); // semaines avec séances, récentes d'abord
+    const oldest = weeksWith[weeksWith.length - 1], newest = weeksWith[0];
+    if (st.week == null || st.week < oldest || st.week > newest) st.week = newest;
+    const ws = st.week, we = shiftWeek(ws, 1);
+    const inWeek = hist.filter((r) => r.date >= ws && r.date < we);
+    const go = (w) => { st.week = w; renderProg(); };
+    const options = weeksWith.slice(); if (options.indexOf(ws) < 0) options.push(ws); options.sort((a, b) => b - a);
+    const sel = h("select", { class: "field", "aria-label": "Choisir la semaine", onchange: () => go(Number(sel.value)) },
+      options.map((w) => h("option", { value: String(w), text: weekLabel(w) + " (" + plural(hist.filter((r) => r.date >= w && r.date < shiftWeek(w, 1)).length, "séance") + ")" })));
+    sel.value = String(ws);
+    root.append(h("section", { class: "card" }, h("h3", { text: "Semaine" }),
+      h("div", { class: "wk" },
+        h("button", { class: "wkb", type: "button", "aria-label": "Semaine précédente", disabled: ws <= oldest, onclick: () => go(shiftWeek(ws, -1)) }, "‹"),
+        sel,
+        h("button", { class: "wkb", type: "button", "aria-label": "Semaine suivante", disabled: ws >= newest, onclick: () => go(shiftWeek(ws, 1)) }, "›"))));
+    root.append(totalsCard(p, inWeek, "Totaux · " + weekLabel(ws)));
+    const syn = h("section", { class: "card" }, h("h3", { text: "Séances de la semaine · comparaison avec la précédente" }));
+    if (!inWeek.length) syn.append(h("p", { class: "muted", style: "margin:0", text: "Aucune séance cette semaine." }));
+    else {
+      syn.append(h("p", { class: "muted small", style: "margin:-4px 2px 10px", text: "Touchez une séance pour déplier ses séries." }));
+      inWeek.slice().reverse().forEach((r, k) => {
+        const d = h("details", { class: "hist" },
+          h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") })),
+          h("div", { class: "hb" }, compareEl(hist, r)));
+        if (k === 0) d.open = true;
+        syn.append(d);
+      });
+    }
     syn.append(h("button", { class: "btn block", type: "button", style: "margin-top:12px", onclick: () => { ui.list.seg = "done"; setTab("list"); } }, "Voir toutes les séances"));
     root.append(syn);
   }
@@ -2086,7 +2116,7 @@
     }
     L.push(who ? "Compte : « " + who.name + " » (clé " + who.key.slice(0, 8) + "…)" : "Compte : non connecté");
     const dirty = D.profiles.filter((p) => { const st = D.sync.profiles[p.id]; return !st || st.h !== hashOf(contentOf(p)); }).length;
-    L.push("Profils sur l’appareil : " + D.profiles.length + " (dont " + dirty + " pas encore envoyés)");
+    L.push("Profils chargés : " + D.profiles.length + " (dont " + dirty + " pas encore enregistrés dans le compte)");
     L.push("Dernière synchro : " + (sync.last ? new Date(sync.last).toLocaleTimeString("fr-FR") : "jamais") + (sync.error ? " · erreur : " + sync.error : ""));
     return L;
   }
