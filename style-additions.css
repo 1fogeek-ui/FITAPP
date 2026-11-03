@@ -1,0 +1,46 @@
+/* Ajouts pour Tempo v2 : à charger APRÈS style.css */
+
+.start {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 18px auto 14px;
+  padding: 16px 20px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  background: #f2f6fa;
+  color: #101b28;
+  cursor: pointer;
+}
+.start[hidden] { display: none; }
+.start:active { transform: scale(.98); }
+
+/* Mode actif : léger contour pour voir quel compteur tourne */
+.actions button.active {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.dial.paused { opacity: .6; }
+
+/* Bilan de fin de séance */
+.summary-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 12px;
+}
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .06);
+}
+.summary-row span { font-weight: 600; }
+.summary-row strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.summary-row small { grid-column: 1 / -1; opacity: .65; }
