@@ -167,7 +167,14 @@
   /* ---------- Profil / historique ---------- */
   .av { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex: none; display: inline-flex; align-items: center; justify-content: center; background: rgba(205,240,120,.14); color: var(--accent); font-weight: 800; font-size: 1.2rem; border: 1px solid rgba(255,255,255,.12); }
   .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .av.xs { width: 22px; height: 22px; font-size: .7rem; vertical-align: middle; }
+  .av.xs { width: 34px; height: 34px; font-size: .95rem; }
+  .av.xl { width: 96px; height: 96px; font-size: 2.6rem; border: 3px solid rgba(205,240,120,.6); }
+  .who.hasav { padding: 4px 14px 4px 4px; gap: 8px; }
+  .prow .av { width: 54px; height: 54px; }
+  .phero { display: flex; align-items: center; gap: 18px; padding: 4px 2px 16px; }
+  .phero-t { min-width: 0; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
+  .phero-t b { font-size: 1.5rem; letter-spacing: -.02em; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .phero-t small { color: var(--muted); margin-bottom: 8px; }
   .avbtn { border: 0; background: transparent; padding: 0; flex: none; border-radius: 50%; }
   .avgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
   .avopt { border: 2px solid transparent; border-radius: 50%; padding: 0; background: transparent; aspect-ratio: 1 / 1; }
@@ -1515,6 +1522,14 @@
     else box.append(document.createTextNode(String((pr && pr.name) || "?").trim().charAt(0).toUpperCase() || "?"));
     return box;
   }
+  // bandeau en haut du Profil : grande photo du profil actif, nom, et bouton pour la changer
+  function profileHero() {
+    const pr = prof(); if (!pr) return h("div");
+    return h("section", { class: "phero" },
+      h("button", { class: "avbtn", type: "button", "aria-label": "Changer l’avatar de " + pr.name, onclick: () => openAvatarPicker(pr) }, avatarEl(pr, "xl")),
+      h("div", { class: "phero-t" }, h("b", { text: pr.name }), h("small", { text: plural(pr.history.length, "séance") + " · " + plural(pr.custom.length, "exercice créé") }),
+        h("button", { class: "btn mini", type: "button", onclick: () => openAvatarPicker(pr) }, "Changer d’avatar")));
+  }
   function openAvatarPicker(pr) {
     const grid = h("div", { class: "avgrid" });
     AVATARS.forEach((a, k) => {
@@ -1529,6 +1544,7 @@
     const root = $("viewProfile"); root.replaceChildren();
     const p = prof(); if (!p) return;
     root.append(h("h2", { class: "vt", text: "Profil" }));
+    root.append(profileHero());
     root.append(accountCard());
 
     // Profils
@@ -1848,7 +1864,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "4 nov. 2026 · 18:35 · f82221"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "4 nov. 2026 · 18:56 · 2ac341"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2023,8 +2039,9 @@
   function paintChip() {
     const c = $("chip");
     if (c && prof()) {
-      const pr = prof(); c.replaceChildren();
-      if (pr.avatar && AVATAR_IDX.get(pr.avatar)) c.append(avatarEl(pr, "xs"), document.createTextNode(pr.name + cloudMark()));
+      const pr = prof(); c.replaceChildren(); const has = !!(pr.avatar && AVATAR_IDX.get(pr.avatar));
+      if (c.classList) c.classList.toggle("hasav", has);
+      if (has) c.append(avatarEl(pr, "xs"), document.createTextNode(pr.name + cloudMark()));
       else c.append(document.createTextNode("👤 " + pr.name + cloudMark()));
     }
   }
