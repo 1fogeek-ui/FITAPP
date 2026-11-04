@@ -1712,7 +1712,7 @@
       const body = h("div", { class: "hb" }, kv("Présence", fmtLong(r.presence)), kv("Exercice", fmtLong(r.ex)), kv("Repos", fmtLong(r.rest)), kv("Non comptabilisé", fmtLong(r.other)));
       body.append(compareEl(hist, r));
       body.append(ui.confirm === delKey
-        ? h("button", { class: "btn mini danger", type: "button", onclick: () => { const i = p.history.indexOf(r); if (i >= 0) p.history.splice(i, 1); ui.confirm = null; saveData(); rerender(); } }, "Confirmer la suppression")
+        ? h("button", { class: "btn mini danger", type: "button", onclick: () => { const i = p.history.indexOf(r); if (i >= 0) p.history.splice(i, 1); ui.confirm = null; saveData(); renderGoalBar(); rerender(); } }, "Confirmer la suppression")
         : h("button", { class: "btn mini", type: "button", onclick: () => { ui.confirm = delKey; rerender(); } }, "Supprimer cette séance"));
       const d = h("details", { class: "hist" }, histSummary(hist, r), body);
       if (ui.confirm === delKey) d.open = true;
@@ -2008,7 +2008,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "4 nov. 2026 · 20:17 · c6b6c3"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "4 nov. 2026 · 20:55 · f3309f"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2558,6 +2558,7 @@
     $("viewSeance").hidden = t !== "seance"; $("viewList").hidden = t !== "list"; $("viewLib").hidden = t !== "lib"; $("viewProg").hidden = t !== "prog"; $("viewProfile").hidden = t !== "profile";
     document.querySelectorAll("#tabs button").forEach((b) => { if (b.dataset.tab === t) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
     ui.confirm = null;
+    if (t === "seance") { renderGoalBar(); renderSessions(); }
     if (t === "lib") { ui.lib.cat = null; ui.lib.q = ""; renderLib(); }
     if (t === "list") renderList();
     if (t === "prog") renderProg();
