@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#121b27">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tempo">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Tempo · Chrono musculation</title>
 <style>
   :root {
@@ -474,8 +481,8 @@
           <div class="sc-head"><b id="scTitle">Série</b><span id="scSub"></span></div>
           <button type="button" class="sc-note" id="scNote" hidden></button>
           <div class="sc-grid" id="scFields">
-            <div class="sc-f"><label for="wIn">POIDS (kg)</label><div class="step"><button type="button" id="wMinus" aria-label="Moins 0,5 kg">−</button><input id="wIn" type="number" inputmode="decimal" min="0" step="0.5" value="0"><button type="button" id="wPlus" aria-label="Plus 0,5 kg">+</button></div>
-            <div class="quick"><button type="button" id="wMinus5" aria-label="Moins 2,5 kg">−2,5</button><button type="button" id="wPlus5" aria-label="Plus 2,5 kg">+2,5</button></div></div>
+            <div class="sc-f"><label for="wIn">POIDS (kg)</label><div class="step"><button type="button" id="wMinus" aria-label="Moins 1 kg">−</button><input id="wIn" type="number" inputmode="decimal" min="0" step="0.5" value="0"><button type="button" id="wPlus" aria-label="Plus 1 kg">+</button></div>
+            <div class="quick"><button type="button" id="wMinusH" aria-label="Moins 0,5 kg">−0,5</button><button type="button" id="wPlusH" aria-label="Plus 0,5 kg">+0,5</button></div></div>
             <div class="sc-f"><label for="rIn">RÉPÉTITIONS</label><div class="step"><button type="button" id="rMinus" aria-label="Moins une répétition">−</button><input id="rIn" type="number" inputmode="numeric" min="0" step="1" value="0"><button type="button" id="rPlus" aria-label="Plus une répétition">+</button></div></div>
           </div>
           <p class="sc-prev" id="scPrev"></p>
@@ -1258,12 +1265,13 @@
     const vol = items.reduce((a, x) => a + x.vol, 0);
     const rec = { date: S.sessionStart, presence, ex, rest, other, sets: S.sets, vol, items, name: S.name || null };
     const p = D.profiles.find((x) => x.id === S.pid);
-    if (p) { p.history.push(rec); p.plan = []; saveData(); }
+    if (p) { p.history.push(rec); p.plan = []; saveData(); try { onSessionFinished(rec); } catch (e) {} }
     stopTicker(); unlockScreen(); lsDel(SESSION_KEY);
     S = fresh();
     showSummary(rec);
     render();
   }
+  let onSessionFinished = () => {}; // remplacé par le module de synchronisation (félicitations du coach)
   function showSummary(r) {
     const rows = [
       ["Temps total de présence", r.presence, "Du début à la fin de la séance", true],
@@ -1343,10 +1351,10 @@
   function bump(key, d) { const t = targetFor(); t.obj[key] = Math.max(0, Math.round((t.obj[key] + d) * 100) / 100); saveS(); renderSetCard(true); }
   sc.w.addEventListener("input", () => { targetFor().obj.w = parseNum(sc.w.value); saveS(); });
   sc.r.addEventListener("input", () => { targetFor().obj.r = Math.round(parseNum(sc.r.value)); saveS(); });
-  $("wMinus").addEventListener("click", () => bump("w", -0.5));
-  $("wMinus5").addEventListener("click", () => bump("w", -2.5));
-  $("wPlus").addEventListener("click", () => bump("w", 0.5));
-  $("wPlus5").addEventListener("click", () => bump("w", 2.5));
+  $("wMinus").addEventListener("click", () => bump("w", -1));      // − / + : 1 kg
+  $("wMinusH").addEventListener("click", () => bump("w", -0.5));   // petits boutons : 0,5 kg
+  $("wPlus").addEventListener("click", () => bump("w", 1));
+  $("wPlusH").addEventListener("click", () => bump("w", 0.5));
   $("rMinus").addEventListener("click", () => bump("r", -1));
   $("rPlus").addEventListener("click", () => bump("r", 1));
 
@@ -1614,6 +1622,7 @@
     root.append(h("h2", { class: "vt", text: "Profil" }));
     root.append(profileHero());
     root.append(accountCard());
+    root.append(pushCard());
 
     // Profils
     const sec = h("section", { class: "card" }, h("h3", { text: "Profils" }), h("p", { class: "muted small", style: "margin:-4px 0 4px", text: "Touchez la photo d’un profil pour changer son avatar." }));
@@ -2008,7 +2017,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "4 nov. 2026 · 20:55 · f3309f"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "4 nov. 2026 · 22:44 · 225cb0"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2486,7 +2495,7 @@
     } finally { sync.noRender = false; sync.allowLive = false; }
     finishLegacy();
     boot.ready = true; ui.tab = "seance";
-    renderAll(); setTab("seance"); writeLocal(); toast("Connecté");
+    renderAll(); setTab("seance"); writeLocal(); refreshPush(); toast("Connecté");
   }
 
   // Ouverture de l'appli déjà connecté : chargement depuis le compte (avec « Réessayer » si le réseau manque)
@@ -2501,7 +2510,7 @@
     if (sync.error && !(hadLocal && sync.offline)) { renderAll(); return; } // erreur autre que « pas de réseau » : écran avec « Réessayer »
     if (!sync.error) finishLegacy();
     boot.ready = true; ui.tab = "seance";
-    renderAll(); setTab("seance"); writeLocal();
+    renderAll(); setTab("seance"); writeLocal(); refreshPush();
   }
 
   function renderLoading() {
@@ -2514,6 +2523,100 @@
           h("button", { class: "btn primary block", type: "button", onclick: () => bootLoad() }, "Réessayer"),
           h("button", { class: "btn block", type: "button", onclick: () => { dropIdentity(); renderAll(); } }, "Se déconnecter")));
     } else box.append(h("p", { class: "muted", style: "margin:0", text: "Chargement de vos données…" }));
+  }
+
+
+  /* ---------- Notifications du coach (Web Push) ---------- */
+  const PUSH_FLAG = "tempo-push-on"; // cet appareil a activé les notifications
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent || "") || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isStandalone = () => navigator.standalone === true || (typeof matchMedia === "function" && matchMedia("(display-mode: standalone)").matches);
+  const pushCapable = () => typeof navigator !== "undefined" && "serviceWorker" in navigator && typeof PushManager !== "undefined" && typeof Notification !== "undefined";
+  const toB64u = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const fromB64u = (str) => { str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "="; const bin = atob(str); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; };
+
+  async function pushInfo() {
+    if (!pushCapable()) return { state: isIOS() && !isStandalone() ? "install" : "unsupported" };
+    if (isIOS() && !isStandalone()) return { state: "install" };
+    if (Notification.permission === "denied") return { state: "denied" };
+    let sub = null;
+    try { const reg = await navigator.serviceWorker.getRegistration(); sub = reg ? await reg.pushManager.getSubscription() : null; } catch (e) {}
+    if (!sub || Notification.permission !== "granted") return { state: "off" };
+    let coach = false;
+    try { const st = await rpc("tempo_push_status", { p_endpoint: sub.endpoint }); coach = !!(st && st.coach); } catch (e) {}
+    return { state: "on", coach, endpoint: sub.endpoint };
+  }
+  async function sendSub(sub) {
+    const j = sub.toJSON(); const pr = prof();
+    await rpc("tempo_push_subscribe", { p_label: (pr && pr.name) || (who && who.name) || "", p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+  }
+  async function enablePush() {
+    if (!pushCapable()) throw new Error("Ce navigateur ne gère pas les notifications.");
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") throw new Error("Les notifications n’ont pas été autorisées.");
+    const cfg = await rpc("tempo_push_public_key");
+    if (!cfg || !cfg.public_key) throw new Error("Le serveur des notifications n’est pas encore prêt. Réessaie dans une minute.");
+    await navigator.serviceWorker.register("sw.js");
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (sub && sub.options && sub.options.applicationServerKey && toB64u(sub.options.applicationServerKey) !== cfg.public_key) { await sub.unsubscribe(); sub = null; }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: fromB64u(cfg.public_key) });
+    await sendSub(sub);
+    lsSet(PUSH_FLAG, "1");
+  }
+  async function disablePush() {
+    const reg = await navigator.serviceWorker.getRegistration(); const sub = reg ? await reg.pushManager.getSubscription() : null;
+    if (sub) { try { await rpc("tempo_push_unsubscribe", { p_endpoint: sub.endpoint }); } catch (e) {} await sub.unsubscribe(); }
+    lsDel(PUSH_FLAG);
+  }
+  async function testPush() {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) throw new Error("Le service des notifications n’est pas démarré. Recharge l’appli.");
+    await reg.showNotification("Tempo", { body: "Ça marche : les notifications s’affichent correctement ✅", icon: "icon-192.png", badge: "badge-96.png", tag: "tempo-test" });
+  }
+  // à chaque ouverture : on remet l'abonnement à jour dans le compte (sans bruit)
+  async function refreshPush() {
+    try {
+      if (!pushCapable() || lsGet(PUSH_FLAG) !== "1") return;
+      if (Notification.permission !== "granted") { lsDel(PUSH_FLAG); return; }
+      const reg = await navigator.serviceWorker.getRegistration(); const sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (!sub) { lsDel(PUSH_FLAG); return; }
+      await sendSub(sub);
+    } catch (e) { /* silencieux */ }
+  }
+  // fin de séance : le serveur envoie les félicitations du coach (si le coach est activé pour ce compte)
+  function pushFinished(rec) {
+    try {
+      if (!who || lsGet(PUSH_FLAG) !== "1") return;
+      const pr = prof(); const ws = pr ? weekStats(pr) : { done: 0, goal: 3 };
+      const hs = pr ? pr.history.slice().sort((a, b) => a.date - b.date) : [];
+      const rids = recordIds(hs, rec); const recs = (rec.items || []).filter((x) => rids.has(x.id)).map((x) => x.name).slice(0, 3);
+      rpc("tempo_push_finished", { p_payload: { sets: rec.sets, minutes: Math.round((rec.presence || 0) / 60000), name: rec.name || "", done: ws.done, goal: ws.goal, recs } }).catch(() => {});
+    } catch (e) { /* silencieux */ }
+  }
+  onSessionFinished = pushFinished;
+
+  function pushCard() {
+    const card = h("section", { class: "card" }, h("h3", { text: "Notifications" }));
+    const body = h("div"); card.append(body);
+    async function paint(note) {
+      body.replaceChildren(h("p", { class: "muted small", style: "margin:0", text: "…" }));
+      const info = await pushInfo(); body.replaceChildren();
+      const err = h("p", { class: "small", style: "margin:10px 0 0;color:var(--danger)", text: note || "" }); err.hidden = !note;
+      const act = (label, cls, fn) => { const b = h("button", { class: "btn " + cls + " block", type: "button", style: "margin-top:10px" }, label); b.addEventListener("click", async () => { b.disabled = true; try { await fn(); await paint(); } catch (e) { await paint((e && e.message) || String(e)); } }); return b; };
+      if (info.state === "unsupported") body.append(h("p", { class: "muted", style: "margin:0", text: "Ce navigateur ne gère pas les notifications. Utilise Safari sur iPhone ou Chrome sur Android." }));
+      else if (info.state === "install") body.append(h("p", { style: "margin:0 0 8px", text: "Pour recevoir les messages de ton coach sur iPhone, ajoute d’abord Tempo à l’écran d’accueil :" }),
+        h("ol", { class: "muted", style: "margin:0;padding-left:20px;line-height:1.55" }, h("li", { text: "Touche le bouton Partager (le carré avec une flèche) dans Safari." }), h("li", { text: "Choisis « Sur l’écran d’accueil »." }), h("li", { text: "Ouvre Tempo depuis son icône, puis reviens ici." })));
+      else if (info.state === "denied") body.append(h("p", { class: "muted", style: "margin:0", text: "Les notifications sont bloquées pour Tempo. Autorise-les dans Réglages → Notifications → Tempo (iPhone) ou dans les réglages du site (Android), puis reviens ici." }));
+      else if (info.state === "off") body.append(h("p", { class: "muted", style: "margin:0", text: "Reçois les rappels de séance, les messages d’encouragement et les félicitations de ton coach." }), act("Activer les notifications", "primary", enablePush));
+      else {
+        body.append(h("p", { style: "margin:0", text: "Notifications activées ✓" }),
+          h("p", { class: "muted small", style: "margin:6px 0 0", text: info.coach ? "Le programme de ton coach est actif : tu recevras ses messages." : "Ton coach n’a pas encore activé ton programme : les messages arriveront dès que ce sera fait." }),
+          act("Tester l’affichage", "", testPush), act("Désactiver les notifications", "", disablePush));
+      }
+      body.append(err);
+    }
+    paint();
+    return card;
   }
 
   function accountCard() {
@@ -2585,6 +2688,9 @@
 
   // Pincement : bloqué aussi sur iPhone (événements « gesture » propres à Safari)
   ["gesturestart", "gesturechange", "gestureend"].forEach((t) => document.addEventListener(t, (e) => e.preventDefault()));
+
+  // Service worker : notifications du coach + ouverture sans réseau (ignoré hors http/https, par exemple dans un aperçu)
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
 
   /* ---------- Démarrage ---------- */
   renderAll();
