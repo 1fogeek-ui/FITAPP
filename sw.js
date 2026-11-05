@@ -33,8 +33,12 @@ self.addEventListener("push", (event) => {
   try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : "" }; }
   const title = d.title || "Tempo";
   const options = { body: d.body || "", icon: d.icon || "icon-192.png", badge: d.badge || "badge-96.png", tag: d.tag || "tempo", renotify: !!d.tag, data: { url: d.url || "./" } };
-  // Safari exige qu'une notification soit toujours affichée à la réception d'un message
-  event.waitUntil(self.registration.showNotification(title, options));
+  // Safari exige qu'une notification soit toujours affichée à la réception d'un message ; on prévient aussi les pages ouvertes (la cloche se met à jour)
+  event.waitUntil((async () => {
+    await self.registration.showNotification(title, options);
+    const pages = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    pages.forEach((c) => c.postMessage({ type: "push" }));
+  })());
 });
 
 // Un appui sur la notification ouvre (ou ramène au premier plan) l'appli
@@ -43,7 +47,7 @@ self.addEventListener("notificationclick", (event) => {
   const target = new URL((event.notification.data && event.notification.data.url) || "./", self.registration.scope).href;
   event.waitUntil((async () => {
     const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    for (const c of list) { if (c.url.startsWith(self.registration.scope) && "focus" in c) return c.focus(); }
-    return self.clients.openWindow(target);
+    for (const c of list) { if (c.url.startsWith(self.registration.scope) && "focus" in c) { c.postMessage({ type: "open-inbox" }); return c.focus(); } } // appli déjà ouverte : on y ouvre la cloche
+    return self.clients.openWindow(target); // sinon l'adresse se termine par #messages : l'appli ouvre la cloche au démarrage
   })());
 });
