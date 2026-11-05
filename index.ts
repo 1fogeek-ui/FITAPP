@@ -251,6 +251,14 @@ function dueForOwner(sub, facts, nowMs, recentComeback = false) {
   return slots.filter((s) => t.min >= s.at && t.min < s.at + GRACE_MIN).map((s) => ({ ...s, day: t.day }));
 }
 
+// Un exemple de chaque type de message (pour tester sur UN appareil sans attendre l'heure prévue)
+const SAMPLE_KINDS = ["breakfast", "snack", "choco", "train", "train_late", "motiv", "comeback", "sunday_ok", "sunday_miss", "finish"];
+const SAMPLE_CTX = { comeback: { n: 5 }, sunday_ok: { done: 3, goal: 3 }, sunday_miss: { done: 1, goal: 3 }, finish: { sets: 12, minutes: 48, recs: ["Hip thrust barre"], done: 2, goal: 3 } };
+function sampleMessage(kind, rng = Math.random) {
+  if (!BANK[kind] || kind === "test") throw new Error("type inconnu : " + kind);
+  return { kind, text: composeMessage(kind, SAMPLE_CTX[kind] || {}, [], rng).text };
+}
+
 /* ------------------------------ moteur ------------------------------ */
 // Une « passe » (appelée chaque minute) : messages programmés + file d'attente (félicitations, test…).
 async function runTick({ db, send, now = Date.now(), rng = Math.random, coachName = COACH_NAME_DEFAULT }) {
@@ -375,6 +383,10 @@ function makeDb() {
 }
 
 const TTL = { finish: 1800, test: 600 };
+// explication en clair du refus éventuel du service de notification (Apple, Google, Mozilla)
+const hint = (st) => st === 404 || st === 410 ? "L'appareil n'est plus abonné : réactive les notifications dans la carte de l'appli, puis relis l'identifiant."
+  : st === 400 || st === 401 || st === 403 ? "Le service (Apple ou Google) refuse l'identification de l'expéditeur : donne-moi la « reponse_du_service »."
+  : st === 413 ? "Message trop long." : st === 429 ? "Trop d'envois : attends quelques minutes." : st >= 500 ? "Panne passagère du service de notification : réessaie dans un instant." : "Réponse inattendue du service.";
 const send = (sub, payload, vapid, kind) => sendWebPush(sub, payload, { vapid, subject: SITE_URL, ttl: TTL[kind] || 7200, topic: String(kind).slice(0, 32) });
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
 function sameSecret(a, b) { if (!a || !b || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
@@ -386,6 +398,22 @@ async function handle(req) {
   let body = {}; try { body = await req.json(); } catch (_) { /* corps vide */ }
   const action = body.action || "tick"; const db = makeDb(); const now = Date.now();
   try {
+    if (action === "test" && body.sub_id) { // test sur UN appareil précis (même sans « coach »), sans toucher aux autres abonnés
+      const rows = await pg("tempo_push_subs?id=eq." + q(body.sub_id) + "&select=id,owner_key,label,endpoint,p256dh,auth");
+      if (!rows || !rows[0]) return json({ ok: false, error: "appareil introuvable : vérifie l'identifiant (select id, label from public.tempo_push_subs)" }, 404);
+      const kinds = body.sample === "all" ? SAMPLE_KINDS : [body.sample || "breakfast"];
+      for (const k of kinds) if (!SAMPLE_KINDS.includes(k)) return json({ ok: false, error: "exemple inconnu : " + k + " (au choix : all, " + SAMPLE_KINDS.join(", ") + ")" }, 400);
+      const vapid = await ensureVapid(db); const sent = [];
+      for (const k of kinds) {
+        const msg = sampleMessage(k);
+        const r = await send(rows[0], JSON.stringify({ title: COACH_NAME, body: msg.text, tag: "coach-" + k, url: "./", icon: "icon-192.png", badge: "badge-96.png" }), vapid, "test");
+        sent.push(r.ok ? { type: k, ok: true, statut: r.status } : { type: k, ok: false, statut: r.status, reponse_du_service: r.text, aide: hint(r.status) });
+        await db.markSub(rows[0].id, r.ok ? { ok: true } : { ok: false, error: "HTTP " + r.status + " " + (r.text || "") });
+        if (r.gone) { await db.deleteSub(rows[0].id); break; }
+        if (kinds.length > 1) await new Promise((res) => setTimeout(res, 700)); // un petit intervalle pour qu'ils arrivent dans l'ordre
+      }
+      return json({ ok: true, action, appareil: rows[0].label, envoyes: sent });
+    }
     if (action === "test") { // envoie tout de suite un message de test à tous les abonnés « coach »
       const owners = [...new Set((await db.listCoachSubs()).map((s) => s.owner_key))];
       for (const o of owners) await db.enqueue(o, "test", {}, now);
