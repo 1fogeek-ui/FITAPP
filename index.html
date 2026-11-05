@@ -2017,7 +2017,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "4 nov. 2026 · 22:44 · 225cb0"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "4 nov. 2026 · 23:06 · 8132f1"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2096,9 +2096,9 @@
 
   class SbError extends Error { constructor(status, msg, code) { super(msg); this.status = status; this.code = code; } }
 
-  async function rpc(fn, args) {
-    if (!who) throw new SbError(401, "Non connecté");
-    const body = JSON.stringify(Object.assign({ p_key: who.key }, args || {}));
+  async function rpc(fn, args, key) {
+    if (!who && !key) throw new SbError(401, "Non connecté");
+    const body = JSON.stringify(Object.assign({ p_key: key || who.key }, args || {}));
     let res;
     try {
       res = await fetch(SB.url + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: SB.key, "Content-Type": "application/json" }, body });
@@ -2176,7 +2176,7 @@
   function finishLegacy() { if (sync.legacy && !sync.error) { lsDel(DATA_KEY); lsDel(SESSION_KEY); sync.legacy = false; } }
 
   // Déconnexion : tout est déjà dans le compte, on ne fait que fermer la session sur cet appareil
-  function finishLogout() { ui.confirm = null; dropIdentity(); lsDel(LOCAL_KEY); ui.tab = "seance"; renderAll(); toast("Déconnecté"); }
+  function finishLogout() { ui.confirm = null; pushLeave(who && who.key); dropIdentity(); lsDel(LOCAL_KEY); ui.tab = "seance"; renderAll(); toast("Déconnecté"); }
   async function logoutSimple() {
     await syncNow(); // dernier enregistrement
     if (sync.error && hasPending()) { ui.confirm = "logout-lose"; renderProfile(); return; } // rare : hors connexion avec des modifications non enregistrées
@@ -2583,6 +2583,18 @@
       await sendSub(sub);
     } catch (e) { /* silencieux */ }
   }
+  // déconnexion : cet appareil ne doit plus recevoir les messages de ce compte (abonnement retiré du serveur ET de l'appareil)
+  async function pushLeave(key) {
+    try {
+      if (!pushCapable() || lsGet(PUSH_FLAG) !== "1") return;
+      lsDel(PUSH_FLAG);
+      const reg = await navigator.serviceWorker.getRegistration(); const sub = reg ? await reg.pushManager.getSubscription() : null;
+      if (sub) {
+        try { await rpc("tempo_push_unsubscribe", { p_endpoint: sub.endpoint }, key); } catch (e) { /* hors connexion : le serveur effacera l'abonnement au prochain envoi (adresse devenue invalide) */ }
+        try { await sub.unsubscribe(); } catch (e) {}
+      }
+    } catch (e) { /* silencieux */ }
+  }
   // fin de séance : le serveur envoie les félicitations du coach (si le coach est activé pour ce compte)
   function pushFinished(rec) {
     try {
@@ -2613,7 +2625,9 @@
           h("p", { class: "muted small", style: "margin:6px 0 0", text: info.coach ? "Le programme de ton coach est actif : tu recevras ses messages." : "Ton coach n’a pas encore activé ton programme : les messages arriveront dès que ce sera fait." }),
           act("Tester l’affichage", "", testPush), act("Désactiver les notifications", "", disablePush));
       }
-      body.append(err);
+      const perm = typeof Notification !== "undefined" ? ({ granted: "accordée", denied: "refusée", "default": "jamais demandée" })[Notification.permission] : "indisponible";
+      const iosv = isIOS() && /OS (\d+)[_.](\d+)/.exec(navigator.userAgent || "");
+      body.append(err, h("p", { class: "muted small", style: "margin:12px 0 0;opacity:.8", text: "Diagnostic : autorisation " + perm + " · appli sur l’écran d’accueil : " + (isStandalone() ? "oui" : "non") + " · abonnement : " + (info.state === "on" ? "actif" : "aucun") + (iosv ? " · iOS " + iosv[1] + "." + iosv[2] : "") }));
     }
     paint();
     return card;
