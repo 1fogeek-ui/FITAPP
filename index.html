@@ -59,6 +59,21 @@
   .brand { font-weight: 800; font-size: 1.4rem; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
   .brand .logo { font-size: 1.5rem; color: var(--accent); }
   .brand .dot { color: var(--accent); }
+  .hright { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 0 1 auto; }
+  .hright .who { max-width: none; min-width: 0; flex: 0 1 auto; }
+  .bell { position: relative; flex: none; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); display: inline-flex; align-items: center; justify-content: center; }
+  .bell[hidden] { display: none; }
+  .bell svg { width: 20px; height: 20px; }
+  .bell-n { position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--accent); color: #14210a; font-size: .72rem; font-weight: 800; line-height: 19px; text-align: center; }
+  .bell-n[hidden] { display: none; }
+  .inbox { display: grid; gap: 10px; }
+  .msg { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+  .msg.new { border-color: rgba(205,240,120,.55); background: rgba(205,240,120,.08); }
+  .msg-av { width: 44px; height: 44px; border-radius: 12px; flex: none; object-fit: cover; background: var(--surface-2); }
+  .msg-b { min-width: 0; flex: 1; }
+  .msg-h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .msg-h .muted { font-size: .75rem; white-space: nowrap; }
+  .msg p { margin: 4px 0 0; line-height: 1.35; overflow-wrap: anywhere; }
   .who { border: 1px solid var(--line-2); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: .85rem; font-weight: 700; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .offbar { text-align: center; font-size: .78rem; font-weight: 700; color: var(--amber); background: rgba(245,184,74,.1); border: 1px solid rgba(245,184,74,.45); border-radius: 999px; padding: 6px 12px; margin: 0 0 10px; }
   .offbar[hidden] { display: none; }
@@ -429,7 +444,10 @@
 <main>
   <header>
     <span class="brand"><span class="logo">◷</span> tempo<span class="dot">.</span></span>
-    <button class="who" id="chip" type="button" hidden></button>
+    <span class="hright">
+      <button class="bell" id="bell" type="button" aria-label="Messages de ton coach" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22a2.4 2.4 0 0 0 2.4-2.4h-4.8A2.4 2.4 0 0 0 12 22zm7-6.2V11a7 7 0 0 0-5.2-6.8V3.5a1.8 1.8 0 0 0-3.6 0v.7A7 7 0 0 0 5 11v4.8l-1.7 1.7v.9h17.4v-.9z"/></svg><span class="bell-n" id="bellN" hidden></span></button>
+      <button class="who" id="chip" type="button" hidden></button>
+    </span>
   </header>
   <div class="offbar" id="offbar" hidden>Hors connexion · vos modifications sont gardées sur cet appareil</div>
   <div class="warnbar" id="warn" hidden>Le stockage de ce navigateur est indisponible ou plein : vos données ne seront pas conservées.</div>
@@ -994,6 +1012,36 @@
     box.append(h("p", { class: "muted small", style: "margin:8px 2px 0", text: "Pour retirer un exercice d’une séance, utilisez ✕ dans la séance elle-même (« Ma séance » ou « Modifier »)." }));
     return box;
   }
+
+  /* ---------- La cloche : messages du coach ---------- */
+  let inboxEnabled = false;                                    // activé par le module de synchronisation (ou par l'aperçu)
+  let inboxIcon = "icon-192.png";                              // portrait de l'expéditeur
+  let inboxProvider = async () => ({ unread: 0, items: [] });  // { unread, items: [{ id, kind, title, body, created_at, is_read }] }
+  let inboxMarkRead = async () => {};
+  async function refreshBell() {
+    const bell = $("bell"), n = $("bellN"); if (!bell || !n || !inboxEnabled) return;
+    try {
+      const d = await inboxProvider(); const c = Number(d && d.unread) || 0;
+      n.textContent = c > 9 ? "9+" : String(c); n.hidden = c === 0;
+      bell.setAttribute("aria-label", c ? "Messages de ton coach : " + c + (c > 1 ? " non lus" : " non lu") : "Messages de ton coach");
+    } catch (e) { /* silencieux : la cloche garde son dernier état */ }
+  }
+  function msgWhen(iso) {
+    const d = new Date(iso); if (isNaN(d)) return ""; const now = new Date(); const t = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); const diff = Math.round((day(now) - day(d)) / 86400000);
+    if (diff === 0) return "Aujourd’hui · " + t; if (diff === 1) return "Hier · " + t;
+    return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }) + " · " + t;
+  }
+  async function openInbox() {
+    let d; try { d = await inboxProvider(); } catch (e) { d = { unread: 0, items: [], error: true }; }
+    const list = h("div", { class: "inbox" });
+    if (!d.items || !d.items.length) list.append(h("p", { class: "muted", style: "margin:6px 2px", text: d.error ? "Impossible de charger les messages pour le moment." : "Pas encore de message. Les messages de ton coach apparaîtront ici." }));
+    (d.items || []).forEach((m) => { const img = h("img", { class: "msg-av", alt: "" }); img.src = inboxIcon;
+      list.append(h("div", { class: "msg" + (m.is_read ? "" : " new") }, img, h("div", { class: "msg-b" }, h("div", { class: "msg-h" }, h("b", { text: m.title || "Coach" }), h("span", { class: "muted", text: msgWhen(m.created_at) })), h("p", { text: m.body })))); });
+    openSheet("Messages de ton coach", [list]);
+    if (d.unread) { try { await inboxMarkRead(); } catch (e) { /* silencieux */ } refreshBell(); }
+  }
+  $("bell").addEventListener("click", openInbox);
 
   function openNoteEditor(id, onDone) {
     const ex = exInfo(id); const p = prof(); if (!ex || !p) return;
@@ -2017,7 +2065,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "4 nov. 2026 · 23:06 · 8132f1"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "5 nov. 2026 · 10:04 · e67e0f"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2385,6 +2433,7 @@
   async function poll() {
     if (!who || !boot.ready || sync.busy || stateMissing || document.visibilityState !== "visible") return;
     if (sync.pendingRender && !uiBusy()) { sync.pendingRender = false; renderAll(); }
+    refreshBell(); // toutes les 45 s : y a-t-il un nouveau message du coach ?
     try {
       if (await remoteChanged()) await syncNow({ silent: true });
       else { sync.last = Date.now(); paintAccount(); }
@@ -2495,7 +2544,7 @@
     } finally { sync.noRender = false; sync.allowLive = false; }
     finishLegacy();
     boot.ready = true; ui.tab = "seance";
-    renderAll(); setTab("seance"); writeLocal(); refreshPush(); toast("Connecté");
+    renderAll(); setTab("seance"); writeLocal(); refreshPush(); refreshBell(); toast("Connecté");
   }
 
   // Ouverture de l'appli déjà connecté : chargement depuis le compte (avec « Réessayer » si le réseau manque)
@@ -2510,7 +2559,7 @@
     if (sync.error && !(hadLocal && sync.offline)) { renderAll(); return; } // erreur autre que « pas de réseau » : écran avec « Réessayer »
     if (!sync.error) finishLegacy();
     boot.ready = true; ui.tab = "seance";
-    renderAll(); setTab("seance"); writeLocal(); refreshPush();
+    renderAll(); setTab("seance"); writeLocal(); refreshPush(); refreshBell(); openInboxFromLink();
   }
 
   function renderLoading() {
@@ -2607,6 +2656,15 @@
   }
   onSessionFinished = pushFinished;
 
+  // La cloche : les messages du coach sont gardés sur le serveur ; on y lit la liste et le nombre de messages non lus
+  inboxProvider = async () => rpc("tempo_inbox_list", { p_limit: 40 });
+  inboxMarkRead = async () => rpc("tempo_inbox_mark_read", {});
+  inboxEnabled = true;
+  function openInboxFromLink() { // un appui sur une notification ouvre l'appli sur « #messages »
+    try { if (location.hash === "#messages") { history.replaceState(null, "", location.pathname + location.search); openInbox(); } } catch (e) {}
+  }
+  window.addEventListener("hashchange", () => { if (who && boot.ready) openInboxFromLink(); }); // appli déjà ouverte et adresse « #messages » ouverte dans la même page
+
   function pushCard() {
     const card = h("section", { class: "card" }, h("h3", { text: "Notifications" }));
     const body = h("div"); card.append(body);
@@ -2664,7 +2722,7 @@
 
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && who && (!sync.last || Date.now() - sync.last > 20000)) poll(); });
   window.addEventListener("online", () => scheduleSync(500));
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") writeLocal(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") writeLocal(); else if (who && boot.ready) refreshBell(); });
   window.addEventListener("pagehide", () => writeLocal());
   window.addEventListener("beforeunload", (e) => { writeLocal(); if (who && boot.ready && !localOk && hasPending()) { e.preventDefault(); e.returnValue = ""; } });
   /*SYNC-END*/
@@ -2688,7 +2746,7 @@
   function renderAll() {
     if (who && boot.ready && !prof()) createProfile(who.name);
     const p = prof(); const gate = gateState();
-    $("welcome").hidden = gate !== "login"; $("loading").hidden = gate !== "loading"; $("app").hidden = gate !== "app"; $("tabs").hidden = gate !== "app"; $("chip").hidden = gate !== "app";
+    $("welcome").hidden = gate !== "login"; $("loading").hidden = gate !== "loading"; $("app").hidden = gate !== "app"; $("tabs").hidden = gate !== "app"; $("chip").hidden = gate !== "app"; $("bell").hidden = gate !== "app" || !inboxEnabled;
     if (gate === "login") { renderWelcomeAuth(); return; }
     if (gate === "loading") { renderLoading(); return; }
     paintChip();
@@ -2704,7 +2762,11 @@
   ["gesturestart", "gesturechange", "gestureend"].forEach((t) => document.addEventListener(t, (e) => e.preventDefault()));
 
   // Service worker : notifications du coach + ouverture sans réseau (ignoré hors http/https, par exemple dans un aperçu)
-  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    // le service worker nous prévient : un message vient d'arriver (la cloche se met à jour) ou on a touché une notification (la cloche s'ouvre)
+    navigator.serviceWorker.addEventListener("message", (e) => { const t = e.data && e.data.type; if (t === "push") refreshBell(); else if (t === "open-inbox") openInbox(); });
+  }
 
   /* ---------- Démarrage ---------- */
   renderAll();
