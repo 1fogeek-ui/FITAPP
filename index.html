@@ -1042,7 +1042,7 @@
 
   /* ---------- La cloche : messages du coach ---------- */
   let inboxEnabled = false;                                    // activé par le module de synchronisation (ou par l'aperçu)
-  let inboxIcon = "icon-192.png";                              // portrait de l'expéditeur
+  let inboxIcon = "coach.png";                                 // portrait de l'expéditeur (photo du coach)
   let inboxProvider = async () => ({ unread: 0, items: [] });  // { unread, items: [{ id, kind, title, body, created_at, is_read }] }
   let inboxMarkRead = async () => {};
   async function refreshBell() {
@@ -2194,7 +2194,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "6 nov. 2026 · 20:53 · 1b1fc6"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "6 nov. 2026 · 21:07 · 72ea07"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}

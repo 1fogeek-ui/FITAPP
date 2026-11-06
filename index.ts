@@ -336,7 +336,7 @@ async function runTick({ db, send, now = Date.now(), rng = Math.random, coachNam
     const list = byOwner.get(owner);
     const recent = await db.recentVariants(owner, kind, 60); // on se souvient des 60 derniers envois de ce type
     const msg = composeMessage(kind === "test" ? "test" : kind, ctx, recent, rng);
-    const payload = JSON.stringify({ title: coachName, body: msg.text, tag: "coach-" + kind, url: "./#messages", icon: "icon-192.png", badge: "badge-96.png" }); // « #messages » : un appui sur la notification ouvre la cloche
+    const payload = JSON.stringify({ title: coachName, body: msg.text, tag: "coach-" + kind, url: "./#messages", icon: "coach.png", badge: "badge-96.png" }); // « #messages » : un appui sur la notification ouvre la cloche
     let anyOk = false, transient = false;
     for (const sub of list) {
       const r = await send(sub, payload, vapid, kind);
@@ -456,7 +456,7 @@ const hint = (st) => st === 404 || st === 410 ? "L'appareil n'est plus abonné :
   : st === 413 ? "Message trop long." : st === 429 ? "Trop d'envois : attends quelques minutes." : st >= 500 ? "Panne passagère du service de notification : réessaie dans un instant." : "Réponse inattendue du service.";
 // Pas d'en-tête « Topic » : Apple le refuse (erreur 400 BadWebPushTopic) et il n'est pas nécessaire.
 const send = (sub, payload, vapid, kind) => sendWebPush(sub, payload, { vapid, subject: SITE_URL, ttl: TTL[kind] || 7200 });
-const FN_VERSION = "2026-11-06 20:53"; // date de fabrication de ce code : permet de vérifier quelle version est réellement déployée
+const FN_VERSION = "2026-11-06 21:07"; // date de fabrication de ce code : permet de vérifier quelle version est réellement déployée
 const json = (obj, status = 200) => new Response(JSON.stringify({ version: FN_VERSION, ...obj }), { status, headers: { "Content-Type": "application/json" } });
 function sameSecret(a, b) { if (!a || !b || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
 
@@ -475,7 +475,7 @@ async function handle(req) {
       const vapid = await ensureVapid(db); const sent = [];
       for (const k of kinds) {
         const msg = sampleMessage(k);
-        const r = await send(rows[0], JSON.stringify({ title: COACH_NAME, body: msg.text, tag: "coach-" + k, url: "./#messages", icon: "icon-192.png", badge: "badge-96.png" }), vapid, "test");
+        const r = await send(rows[0], JSON.stringify({ title: COACH_NAME, body: msg.text, tag: "coach-" + k, url: "./#messages", icon: "coach.png", badge: "badge-96.png" }), vapid, "test");
         sent.push(r.ok ? { type: k, ok: true, statut: r.status } : { type: k, ok: false, statut: r.status, reponse_du_service: r.text, aide: hint(r.status) });
         await db.markSub(rows[0].id, r.ok ? { ok: true } : { ok: false, error: "HTTP " + r.status + " " + (r.text || "") });
         if (r.gone) { await db.deleteSub(rows[0].id); break; }
