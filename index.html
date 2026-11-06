@@ -398,6 +398,26 @@
   .tpl-body .erow:first-child { border-top: 1px solid var(--line); }
   .tpl-all { display: flex; justify-content: flex-end; margin: -4px 2px 8px; }
   .linkbtn { border: 0; background: transparent; color: var(--accent); font-weight: 700; font-size: .85rem; padding: 6px 4px; }
+  .past-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .past-grid .wide { grid-column: 1 / -1; }
+  .past-grid .field { min-height: 50px; padding: 10px 14px; }
+  .pl { display: block; margin: 0 0 4px 2px; font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+  .pex { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--surface); }
+  .pex-h { display: flex; align-items: center; gap: 10px; }
+  .pex-h .enm { flex: 1; font-weight: 700; }
+  .pset-head { display: grid; grid-template-columns: 22px 1fr 1fr 36px; gap: 8px; margin-top: 12px; font-size: .62rem; letter-spacing: .12em; font-weight: 700; color: var(--muted); }
+  .pset { display: grid; grid-template-columns: 22px 1fr 1fr 36px; gap: 8px; align-items: start; margin-top: 8px; }
+  .pset .pn { padding-top: 12px; text-align: center; font-weight: 800; font-size: .85rem; color: var(--muted); }
+  .pset .step { border-radius: 14px; }
+  .pset .step button { width: 32px; font-size: 1.2rem; }
+  .pset .step input { font-size: 1.05rem; padding: 9px 0; }
+  .pset .quick { margin-top: 4px; gap: 4px; }
+  .pset .quick button { padding: 5px 0; font-size: .72rem; }
+  .pset .ob { margin-top: 4px; }
+  .padd { margin-top: 10px; width: 100%; }
+  .hs-t { display: block; margin-top: 2px; font-size: .78rem; font-weight: 600; color: var(--muted); }
+  .sc-done { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 0 10px; padding: 8px 12px; border-radius: 12px; background: rgba(205,240,120,.08); border: 1px solid rgba(205,240,120,.25); font-size: .88rem; }
+  .sc-done[hidden] { display: none; }
   .sc-note { display: block; width: 100%; text-align: left; border: 1px dashed var(--line-2); background: transparent; color: var(--muted); border-radius: 12px; padding: 8px 12px; margin: 0 0 10px; font-size: .85rem; line-height: 1.3; }
   .sc-note.has { border-style: solid; border-color: rgba(205,240,120,.35); background: rgba(205,240,120,.07); color: var(--text); }
   .notebox { border: 1px solid var(--line-2); border-radius: 14px; padding: 12px; display: grid; gap: 8px; justify-items: start; }
@@ -498,9 +518,10 @@
         <section class="setcard" id="setCard" hidden>
           <div class="sc-head"><b id="scTitle">Série</b><span id="scSub"></span></div>
           <button type="button" class="sc-note" id="scNote" hidden></button>
+          <div class="sc-done" id="scDone" hidden><span id="scDoneTxt"></span><button type="button" class="linkbtn" id="scDoneBtn">Corriger</button></div>
           <div class="sc-grid" id="scFields">
             <div class="sc-f"><label for="wIn">POIDS (kg)</label><div class="step"><button type="button" id="wMinus" aria-label="Moins 1 kg">−</button><input id="wIn" type="number" inputmode="decimal" min="0" step="0.5" value="0"><button type="button" id="wPlus" aria-label="Plus 1 kg">+</button></div>
-            <div class="quick"><button type="button" id="wMinusH" aria-label="Moins 0,5 kg">−0,5</button><button type="button" id="wPlusH" aria-label="Plus 0,5 kg">+0,5</button></div></div>
+            <div class="quick"><button type="button" id="wMinus5" aria-label="Moins 5 kg">−5</button><button type="button" id="wPlus5" aria-label="Plus 5 kg">+5</button></div></div>
             <div class="sc-f"><label for="rIn">RÉPÉTITIONS</label><div class="step"><button type="button" id="rMinus" aria-label="Moins une répétition">−</button><input id="rIn" type="number" inputmode="numeric" min="0" step="1" value="0"><button type="button" id="rPlus" aria-label="Plus une répétition">+</button></div></div>
           </div>
           <p class="sc-prev" id="scPrev"></p>
@@ -1204,7 +1225,7 @@
   };
   el.progress.style.strokeDasharray = CIRC;
 
-  const fresh = () => ({ pid: null, sessionStart: null, mode: null, totals: { exercise: 0, rest: 0 }, curAccum: 0, segStart: null, paused: false, sets: 0, alerted: false, curEx: null, modeEx: null, perEx: {}, log: [], pend: { id: undefined, w: 0, r: 10 }, name: null });
+  const fresh = () => ({ pid: null, sessionStart: null, mode: null, totals: { exercise: 0, rest: 0 }, curAccum: 0, segStart: null, paused: false, sets: 0, alerted: false, curEx: null, modeEx: null, perEx: {}, log: [], pend: { id: undefined, w: 0, r: 10 }, editPrev: false, pendDirty: false, name: null });
   let S = fresh();
   let audioCtx = null, wakeLock = null, ticker = null;
 
@@ -1263,9 +1284,12 @@
     if (!sessionActive()) startSession(now);
     if (S.mode === next && next === "exercise") { if (S.paused) togglePause(); return; }
     const tv = next === "exercise" ? (() => { const t = targetFor(); if (t.kind === "prev") { const n2 = suggestFor(getCurEx() || null); return { w: n2.w, r: n2.r }; } return { w: t.obj.w, r: t.obj.r }; })() : null;
+    const prevMode = S.mode, prevEx = S.modeEx;
     closeMode(now);
-    S.mode = next; S.segStart = now; S.alerted = false;
+    S.mode = next; S.segStart = now; S.alerted = false; S.editPrev = false;
+    if (next === "rest" && prevMode === "exercise") { S.pend = Object.assign({ id: prevEx || null }, suggestFor(prevEx || null)); S.pendDirty = false; } // la prochaine série est prête : on peut la régler pendant le repos
     if (next === "exercise") {
+      S.pendDirty = false;
       S.sets += 1;
       const id = getCurEx(); S.modeEx = id; S.curEx = id;
       if (id) pe(id).sets += 1;
@@ -1322,7 +1346,7 @@
   let onSessionFinished = () => {}; // remplacé par le module de synchronisation (félicitations du coach)
   function showSummary(r) {
     const rows = [
-      ["Temps total de présence", r.presence, "Du début à la fin de la séance", true],
+      ["Temps total de présence", r.presence, "De " + hhmm(r.date) + " à " + hhmm(r.date + (r.presence || 0)), true],
       ["Temps total d’exercice", r.ex, plural(r.sets, "série"), false],
       ["Temps total de repos", r.rest, "Entre les séries", false],
       ["Temps non comptabilisé", r.other, "Transitions et autres moments", false]
@@ -1350,33 +1374,36 @@
 
   /* ---------- Détail des séries : poids et répétitions ---------- */
   const fmtNum = (n) => (Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100).replace(".", ","));
-  const setLine = (x, i) => `${i + 1}. ` + (x.w > 0 ? `${fmtNum(x.w)} kg` + (x.r > 0 ? ` × ${x.r}` : "") : x.r > 0 ? `${x.r} rép.` : fmt(x.ms || 0));
+  const setText = (x) => (x.w > 0 ? `${fmtNum(x.w)} kg` + (x.r > 0 ? ` × ${x.r}` : "") : x.r > 0 ? `${x.r} rép.` : fmt(x.ms || 0));
+  const setLine = (x, i) => `${i + 1}. ` + setText(x);
   function lastSessionSets(cid) {
     const p = prof(); if (!p || !cid) return null;
-    for (let i = p.history.length - 1; i >= 0; i--) {
-      const it = (p.history[i].items || []).find((x) => x.id === cid);
-      if (it && it.log && it.log.length) return it.log;
-    }
-    return null;
+    let best = null, bd = -Infinity; // la séance la plus récente PAR DATE (une séance ajoutée à la main peut avoir été enregistrée après)
+    p.history.forEach((r) => { const it = (r.items || []).find((x) => x.id === cid); if (it && it.log && it.log.length && (r.date || 0) >= bd) { best = it.log; bd = r.date || 0; } });
+    return best;
   }
-  // Valeurs proposées pour la prochaine série d'un exercice :
-  //  - 1re série du jour : la 1re série de la dernière séance ;
-  //  - ensuite : la série de même numéro de la dernière séance, tant qu'on a refait la même chose ; sinon la série précédente d'aujourd'hui
+  // Valeurs proposées pour une série : celles avec lesquelles on DÉBUTE l'exercice (jamais le maximum atteint) :
+  //  - 1re série du jour : la 1re série de la dernière séance où on a fait cet exercice ;
+  //  - ensuite : la 1re série d'aujourd'hui (poids et répétitions de départ, ajustés par vos soins) ;
+  //  - jamais fait : 10 répétitions, sans poids.
   function suggestFor(cid) {
-    const mine = S.log.filter((e) => e.id === cid); const k = mine.length; const ls = lastSessionSets(cid);
-    if (!k) return ls ? { w: ls[0].w, r: ls[0].r } : { w: 0, r: 10 };
-    const prev = mine[k - 1];
-    if (ls && ls[k] && ls[k - 1] && ls[k - 1].w === prev.w && ls[k - 1].r === prev.r) return { w: ls[k].w, r: ls[k].r };
-    return { w: prev.w, r: prev.r };
+    const mine = S.log.filter((e) => e.id === cid);
+    if (mine.length) return { w: mine[0].w, r: mine[0].r };
+    const ls = lastSessionSets(cid);
+    return ls ? { w: ls[0].w, r: ls[0].r } : { w: 0, r: 10 };
   }
+  // Que modifie la carte de saisie ?
+  //  - série en cours : cette série (« live ») ;
+  //  - pendant le repos : la PROCHAINE série (« next »), pour la préparer ; la série qui vient de finir reste modifiable via « Corriger » (« prev ») ;
+  //  - avant la première série : la prochaine série (« next »).
   function targetFor() {
     const cid = getCurEx() || null; const last = S.log[S.log.length - 1];
     if (S.mode === "exercise" && last) return { obj: last, kind: "live" };
-    if (S.mode === "rest" && last && last.id === cid) return { obj: last, kind: "prev" };
-    if (S.pend.id !== cid) S.pend = Object.assign({ id: cid }, suggestFor(cid));
+    if (S.mode === "rest" && last && last.id === cid && S.editPrev) return { obj: last, kind: "prev" };
+    if (S.pend.id !== cid) { S.pend = Object.assign({ id: cid }, suggestFor(cid)); S.pendDirty = false; }
     return { obj: S.pend, kind: "next" };
   }
-  const sc = { note: $("scNote"), box: $("setCard"), title: $("scTitle"), sub: $("scSub"), prev: $("scPrev"), fields: $("scFields"), w: $("wIn"), r: $("rIn") };
+  const sc = { done: $("scDone"), doneTxt: $("scDoneTxt"), doneBtn: $("scDoneBtn"), note: $("scNote"), box: $("setCard"), title: $("scTitle"), sub: $("scSub"), prev: $("scPrev"), fields: $("scFields"), w: $("wIn"), r: $("rIn") };
   sc.note.addEventListener("click", () => { const c = getCurEx(); if (c) openNoteEditor(c); });
   const parseNum = (v) => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n >= 0 ? n : 0; };
   function renderSetCard(force) {
@@ -1388,7 +1415,12 @@
     { const nt = cid && prof().notes ? prof().notes[cid] : ""; sc.note.hidden = !cid; sc.note.className = "sc-note" + (nt ? " has" : ""); sc.note.textContent = nt ? "Note : " + nt : "＋ Ajouter une note (réglages, astuce…)"; }
     const same = S.log.filter((e) => e.id === (t.kind === "next" ? cid : t.obj.id));
     const n = t.kind === "next" ? same.length + 1 : Math.max(1, same.indexOf(t.obj) + 1);
-    sc.sub.textContent = t.kind === "live" ? `Série ${n} · en cours` : t.kind === "prev" ? `Série ${n} · terminée` : `Prochaine · série ${n}`;
+    sc.sub.textContent = t.kind === "live" ? `Série ${n} · en cours` : t.kind === "prev" ? `Série ${n} · terminée (correction)` : `Prochaine · série ${n}`;
+    { // pendant le repos : rappel de la série qui vient de finir, avec un bouton pour la corriger (ou pour revenir à la prochaine)
+      const lastSet = S.log[S.log.length - 1]; const show = S.mode === "rest" && !!lastSet && lastSet.id === cid && !cardio;
+      sc.done.hidden = !show;
+      if (show) { const k = S.log.filter((e) => e.id === cid).indexOf(lastSet) + 1; sc.doneTxt.textContent = S.editPrev ? `Tu corriges la série ${k}` : `Série ${k} terminée : ${setText({ w: lastSet.w, r: lastSet.r, ms: lastSet.ms })}`; sc.doneBtn.textContent = S.editPrev ? "Revenir à la prochaine" : "Corriger"; }
+    }
     sc.fields.hidden = cardio;
     if (force || (document.activeElement !== sc.w && document.activeElement !== sc.r)) { sc.w.value = String(t.obj.w) /* un champ numérique n’accepte que le point décimal */; sc.r.value = String(t.obj.r); }
     const ls = lastSessionSets(cid);
@@ -1396,13 +1428,18 @@
       : ls ? "Dernière séance : " + ls.map(setLine).join(" · ")
       : "Pas encore d’historique pour cet exercice. Les valeurs sont enregistrées automatiquement.";
   }
-  function bump(key, d) { const t = targetFor(); t.obj[key] = Math.max(0, Math.round((t.obj[key] + d) * 100) / 100); saveS(); renderSetCard(true); }
-  sc.w.addEventListener("input", () => { targetFor().obj.w = parseNum(sc.w.value); saveS(); });
-  sc.r.addEventListener("input", () => { targetFor().obj.r = Math.round(parseNum(sc.r.value)); saveS(); });
+  function bump(key, d) { const t = targetFor(); t.obj[key] = Math.max(0, Math.round((t.obj[key] + d) * 100) / 100); if (t.kind === "next") S.pendDirty = true; saveS(); renderSetCard(true); }
+  sc.w.addEventListener("input", () => { const t = targetFor(); t.obj.w = parseNum(sc.w.value); if (t.kind === "next") S.pendDirty = true; saveS(); });
+  sc.r.addEventListener("input", () => { const t = targetFor(); t.obj.r = Math.round(parseNum(sc.r.value)); if (t.kind === "next") S.pendDirty = true; saveS(); });
+  sc.doneBtn.addEventListener("click", () => {
+    const cid = getCurEx() || null; S.editPrev = !S.editPrev;
+    if (!S.editPrev && !S.pendDirty) S.pend = Object.assign({ id: cid }, suggestFor(cid)); // retour à la prochaine série : ses valeurs tiennent compte de la correction
+    saveS(); renderSetCard(true);
+  });
   $("wMinus").addEventListener("click", () => bump("w", -1));      // − / + : 1 kg
-  $("wMinusH").addEventListener("click", () => bump("w", -0.5));   // petits boutons : 0,5 kg
+  $("wMinus5").addEventListener("click", () => bump("w", -5));    // petits boutons : 5 kg
   $("wPlus").addEventListener("click", () => bump("w", 1));
-  $("wPlusH").addEventListener("click", () => bump("w", 0.5));
+  $("wPlus5").addEventListener("click", () => bump("w", 5));
   $("rMinus").addEventListener("click", () => bump("r", -1));
   $("rPlus").addEventListener("click", () => bump("r", 1));
 
@@ -1467,6 +1504,80 @@
         : h("button", { class: "btn danger block", type: "button", onclick: () => { ui.confirm = dk; openSessionEditor(draft); } }, "Supprimer cette séance"));
     }
     openSheet(draft.id ? "Modifier la séance" : "Nouvelle séance", [h("div", { class: "stack", style: "padding-top:6px" }, name, err, orderBox), bro.el], foot);
+  }
+
+  /* ---------- Ajouter une séance passée (si on a oublié d'utiliser l'appli) ---------- */
+  function openPastSession(draft) {
+    const p = prof(); if (!p) return;
+    const pad = (n) => String(n).padStart(2, "0"); const now = new Date(); const ymd = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    if (!draft._open) { draft._open = true; ui.sess.cat = null; ui.sess.q = ""; Object.assign(draft, { date: ymd(now), start: "18:00", end: "19:00", name: "", items: [] }); }
+    const field = (label, type, key, extra, wide) => {
+      const inp = h("input", Object.assign({ class: "field", type, "aria-label": label, value: draft[key] || "" }, extra || {}));
+      inp.addEventListener("input", () => { draft[key] = inp.value; });
+      return h("div", { class: wide ? "wide" : "" }, h("label", { class: "pl", text: label }), inp);
+    };
+    const err = h("div", { class: "small", style: "color:var(--danger);min-height:1.2em" });
+    const save = h("button", { class: "btn primary block", type: "button", onclick: () => {
+      if (!draft.date || !draft.start || !draft.end) { err.textContent = "Renseignez la date, l’heure de début et l’heure de fin."; return; }
+      const start = new Date(draft.date + "T" + draft.start).getTime(), end = new Date(draft.date + "T" + draft.end).getTime();
+      if (!isFinite(start) || !isFinite(end)) { err.textContent = "Date ou heure invalide."; return; }
+      if (end <= start) { err.textContent = "L’heure de fin doit être après l’heure de début."; return; }
+      if (end - start > 8 * 3600000) { err.textContent = "Une séance ne dépasse pas 8 heures."; return; }
+      if (start > Date.now()) { err.textContent = "La séance ne peut pas être dans le futur."; return; }
+      if (p.history.some((r) => Math.abs(r.date - start) < 60000)) { err.textContent = "Une séance existe déjà à cette heure précise : décalez le début d’une minute."; return; }
+      const items = [];
+      for (const it of draft.items) {
+        const log = it.sets.filter((x) => x.r > 0).map((x) => ({ w: x.w, r: x.r, ms: 0 })); // une série sans répétition est ignorée
+        if (!log.length) { err.textContent = "« " + it.name + " » : ajoutez au moins une série (avec ses répétitions) ou retirez l’exercice."; return; }
+        items.push({ id: it.id, name: it.name, cat: it.cat, sets: log.length, ms: 0, vol: log.reduce((a, x) => a + x.w * x.r, 0), log });
+      }
+      const nm = (draft.name || "").trim().replace(/\s+/g, " ");
+      const rec = { date: start, presence: end - start, ex: 0, rest: 0, other: end - start, sets: items.reduce((a, x) => a + x.sets, 0), vol: items.reduce((a, x) => a + x.vol, 0), items, name: nm || null, manual: true };
+      p.history.push(rec); p.history.sort((a, b) => a.date - b.date); saveData(); renderGoalBar(); toast("Séance ajoutée à l’historique"); closeSheet();
+    } }, "Enregistrer la séance");
+    const itemsBox = h("div");
+    const upd = () => { save.textContent = draft.items.length ? "Enregistrer · " + plural(draft.items.length, "exercice") : "Enregistrer la séance"; };
+    // une série = poids et répétitions, chacun avec ses boutons − / + (le poids a aussi −5 / +5)
+    const stepper = (obj, key, label, step, opts) => {
+      const inp = h("input", { type: "number", inputmode: key === "w" ? "decimal" : "numeric", min: "0", step: key === "w" ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
+      inp.value = String(obj[key]);
+      const put = (v) => { obj[key] = key === "r" ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); };
+      inp.addEventListener("input", () => { const n = parseFloat(String(inp.value).replace(",", ".")); obj[key] = isFinite(n) && n >= 0 ? (key === "r" ? Math.round(n) : n) : 0; });
+      const btn = (txt, d, aria) => h("button", { type: "button", "aria-label": aria, onclick: () => put(obj[key] + d) }, txt);
+      const box = h("div", null, h("div", { class: "step" }, btn("−", -step, "Moins " + step + (key === "w" ? " kg" : " répétition") + " · " + label), inp, btn("+", step, "Plus " + step + (key === "w" ? " kg" : " répétition") + " · " + label)));
+      if (opts && opts.quick) box.append(h("div", { class: "quick" }, btn("−5", -5, "Moins 5 kg · " + label), btn("+5", 5, "Plus 5 kg · " + label)));
+      return box;
+    };
+    const firstSet = (id) => { const ls = lastSessionSets(id); return ls ? { w: ls[0].w, r: ls[0].r } : { w: 0, r: 10 }; }; // la 1re série reprend le départ de la dernière séance
+    const paintItems = () => {
+      itemsBox.replaceChildren();
+      if (!draft.items.length) { itemsBox.append(h("p", { class: "muted small", style: "margin:6px 2px 0", text: "Exercices (facultatif) : choisissez-les ci-dessous pour garder aussi les poids et les répétitions dans vos statistiques. Sans exercice, seule la séance est comptée." })); return; }
+      draft.items.forEach((it, i) => {
+        const ex = exInfo(it.id); const ls = lastSessionSets(it.id);
+        const card = h("div", { class: "pex" },
+          h("div", { class: "pex-h" }, ex ? thumb(ex) : null, h("div", { class: "enm", text: it.name }),
+            h("button", { class: "ob", type: "button", "aria-label": "Retirer " + it.name, onclick: () => { draft.items.splice(i, 1); upd(); bro.repaint(); paintItems(); } }, "✕")));
+        if (it.sets.length) card.append(h("div", { class: "pset-head" }, h("span"), h("span", { text: "POIDS (kg)" }), h("span", { text: "RÉPÉTITIONS" }), h("span")));
+        it.sets.forEach((st, k) => {
+          card.append(h("div", { class: "pset" }, h("span", { class: "pn", text: String(k + 1) }),
+            stepper(st, "w", "Poids série " + (k + 1) + " · " + it.name, 1, { quick: true }), stepper(st, "r", "Répétitions série " + (k + 1) + " · " + it.name, 1),
+            h("button", { class: "ob", type: "button", "aria-label": "Retirer la série " + (k + 1) + " · " + it.name, onclick: () => { it.sets.splice(k, 1); paintItems(); } }, "✕")));
+        });
+        card.append(h("button", { class: "btn mini padd", type: "button", onclick: () => { const last = it.sets[it.sets.length - 1]; it.sets.push(last ? { w: last.w, r: last.r } : firstSet(it.id)); paintItems(); } }, "＋ Ajouter une série"));
+        if (ls) card.append(h("div", { class: "muted small", style: "margin-top:8px", text: "Dernière fois : " + ls.map(setLine).join(" · ") }));
+        itemsBox.append(card);
+      });
+    };
+    const bro = browser(ui.sess, (ex) => {
+      if (draft.items.some((x) => x.id === ex.id)) { toast("Déjà ajouté : retirez-le avec ✕ dans la liste"); return; }
+      draft.items.push({ id: ex.id, name: ex.name, cat: (ex.cats && ex.cats[0]) || "", sets: [firstSet(ex.id)] });
+      upd(); bro.repaint(); paintItems();
+    }, (ex) => ({ sel: draft.items.some((x) => x.id === ex.id) }), "sess");
+    upd(); paintItems();
+    const grid = h("div", { class: "past-grid" }, field("DATE", "date", "date", { max: ymd(now) }, true), field("DÉBUT", "time", "start"), field("FIN", "time", "end"));
+    const nameF = h("input", { class: "field", type: "text", maxlength: "40", placeholder: "Nom de la séance (facultatif)", "aria-label": "Nom de la séance", value: draft.name || "" });
+    nameF.addEventListener("input", () => { draft.name = nameF.value; });
+    openSheet("Ajouter une séance passée", [h("div", { class: "stack", style: "padding-top:6px" }, grid, nameF, err, itemsBox), bro.el], h("div", { class: "stack" }, save));
   }
 
   function renderSessions() {
@@ -1619,6 +1730,8 @@
       h("p", { class: "muted small", style: "margin:14px 2px 0", text: "Touchez un exercice pour l’ajouter à vos séances ou lui mettre une photo." }));
   }
 
+  const hhmm = (ts) => new Date(ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const timeRange = (r) => hhmm(r.date) + " → " + hhmm(r.date + (r.presence || 0)); // une séance enregistre son début (date) et sa durée (presence)
   const dateStr = (ts) => new Date(ts).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
   const kv = (k, v) => h("div", { class: "kv" }, h("span", { text: k }), h("b", { text: v }));
 
@@ -1766,7 +1879,9 @@
     const card = h("section", { class: "card" }, h("h3", { text: "Séances effectuées" }));
     hist.slice().reverse().forEach((r) => {
       const delKey = "h:" + r.date;
-      const body = h("div", { class: "hb" }, kv("Présence", fmtLong(r.presence)), kv("Exercice", fmtLong(r.ex)), kv("Repos", fmtLong(r.rest)), kv("Non comptabilisé", fmtLong(r.other)));
+      const body = h("div", { class: "hb" }, kv("Début", hhmm(r.date)), kv("Fin", hhmm(r.date + (r.presence || 0))), kv("Présence", fmtLong(r.presence)));
+      if (r.manual) body.append(h("p", { class: "muted small", style: "margin:6px 0 2px", text: "Séance ajoutée à la main : le détail du temps d’exercice et de repos n’est pas disponible." }));
+      else body.append(kv("Exercice", fmtLong(r.ex)), kv("Repos", fmtLong(r.rest)), kv("Non comptabilisé", fmtLong(r.other)));
       body.append(compareEl(hist, r));
       body.append(ui.confirm === delKey
         ? h("button", { class: "btn mini danger", type: "button", onclick: () => { const i = p.history.indexOf(r); if (i >= 0) p.history.splice(i, 1); ui.confirm = null; saveData(); renderGoalBar(); rerender(); } }, "Confirmer la suppression")
@@ -1802,7 +1917,7 @@
   // ligne de résumé d'une séance : titre, durée, et une rangée de miniatures des exercices faits
   function histSummary(hist, r) {
     const th = (r.items || []).filter((it) => it.log && it.log.length).map(histThumb).filter(Boolean);
-    const sm = h("summary", null, h("b", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") + (recordIds(hist, r).size ? " · ★ " + recordIds(hist, r).size : "") }));
+    const sm = h("summary", null, h("b", null, h("span", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "hs-t", text: timeRange(r) }), r.manual ? h("span", { class: "hs-t", text: "✎ ajoutée à la main" }) : null), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") + (recordIds(hist, r).size ? " · ★ " + recordIds(hist, r).size : "") }));
     if (th.length) {
       const MAX = 7; const strip = h("div", { class: "minis" }, th.slice(0, MAX));
       if (th.length > MAX) strip.append(h("span", { class: "more", text: "+" + (th.length - MAX) }));
@@ -1882,6 +1997,7 @@
     root.append(h("h2", { class: "vt", text: "Séances" }));
     root.append(h("div", { class: "chips" }, [["tpl", "Mes séances"], ["done", "Effectuées"]].map(([k, l]) => h("button", { class: "chip", type: "button", "aria-pressed": String(st.seg === k), onclick: () => { st.seg = k; ui.confirm = null; renderList(); } }, l))));
     if (st.seg === "done") {
+      root.append(h("button", { class: "btn block", type: "button", style: "margin:2px 0 12px", onclick: () => openPastSession({}) }, "＋ Ajouter une séance passée"));
       if (!hist.length) root.append(h("div", { class: "card" }, h("p", { class: "muted", style: "margin:0", text: "Aucune séance effectuée pour l’instant. Terminez une séance : elle apparaîtra ici avec ses séries, poids et répétitions." })));
       else root.append(histCard(p, hist, renderList));
       return;
@@ -2065,7 +2181,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "5 nov. 2026 · 10:04 · e67e0f"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "6 nov. 2026 · 10:10 · afe0da"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
