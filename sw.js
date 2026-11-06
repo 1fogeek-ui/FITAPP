@@ -1,4 +1,4 @@
-// Tempo · service worker : notifications du coach + ouverture de l'appli même sans réseau.
+// FH Pulse · service worker : notifications du coach + ouverture de l'appli même sans réseau.
 const SHELL = "tempo-shell-v1";
 
 self.addEventListener("install", () => { self.skipWaiting(); });
@@ -31,7 +31,7 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("push", (event) => {
   let d = {};
   try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : "" }; }
-  const title = d.title || "Tempo";
+  const title = d.title || "FH Pulse";
   const options = { body: d.body || "", icon: d.icon || "icon-192.png", badge: d.badge || "badge-96.png", tag: d.tag || "tempo", renotify: !!d.tag, data: { url: d.url || "./" } };
   // Safari exige qu'une notification soit toujours affichée à la réception d'un message ; on prévient aussi les pages ouvertes (la cloche se met à jour)
   event.waitUntil((async () => {

@@ -75,6 +75,7 @@ async function sendWebPush(sub, payload, { vapid, subject, ttl = 3600, urgency =
 // Tout est indépendant de la base : la couche de stockage (db) et l'envoi (send) sont injectés → testable hors ligne.
 const COACH_NAME_DEFAULT = "Faissal";
 const SITE_URL = "https://1fogeek-ui.github.io/FITAPP/";
+const COMEBACK_DAYS = 2;            // message de reprise à partir de 2 jours sans séance
 const GRACE_MIN = 8;                // un message reste « dû » 8 minutes après son heure (au cas où un passage du minuteur serait manqué)
 const DAY_MS = 86400000;
 
@@ -126,19 +127,26 @@ const BANK = {
         "Chocolat : oui. Marathon de chocolat : non. Je te fais confiance 💛",
         "Un peu de chocolat pour la douceur, et on garde le reste pour demain, promis ?"] },
   train: {
-    g: ["Allez ma Puce, c’est l’heure ! 💪", "Ma Puce, rendez-vous à la salle (ou au salon) !", "Debout les cuisses ! 🍑", "Alerte séance, ma Puce 🚨", "Coucou ma Puce, ton coach te parle 🎤", "Hop hop hop, ma Puce !", "Ma Puce, mets tes baskets ! 👟"],
-    c: ["Séance cuisses & fessiers ce soir : ils t’attendent avec impatience 🍑",
-        "Ouvre Tempo et lance ta séance : tes cuisses ont des choses à te dire 😄",
-        "Aujourd’hui : cuisses & fessiers ! Même 30 minutes comptent, le plus dur c’est de commencer.",
-        "Presse à cuisses, hip thrust, fentes… le menu du soir est servi 🍽️💪",
-        "Pas de flemme ce soir : les fessiers ne se muscleront pas devant la télé 📺😂",
-        "Petite séance, grand résultat : cuisses & fessiers, on s’y met ?",
-        "Un échauffement, et c’est parti pour une belle séance de jambes. Je suis fier de toi d’avance 💛",
-        "Ton futur toi te regarde et te dit « merci d’y aller » 🙏 Cuisses & fessiers au programme !",
-        "5 minutes d’échauffement suffisent pour te lancer : après, tu ne voudras plus t’arrêter 🔥",
-        "Cuisses & fessiers : ils ne vont pas se muscler tout seuls (j’ai déjà essayé de leur parler) 😂",
-        "Hip thrust, glute bridge, squat… choisis ton arme 🗡️",
-        "Ouvre Tempo, lance le chrono, et montre à ces cuisses qui commande 👑"] },
+    // envoyé en début d'après-midi (15h par défaut) : de quoi se préparer dans sa tête avant d'aller s'entraîner
+    g: ["Coucou ma Puce 💛", "Petit rappel de ton coach, ma Puce 🎤", "Ma Puce, on y pense dès maintenant !", "Alerte séance, ma Puce 🚨", "Hop, ma Puce, c’est jour de séance !", "Debout les fessiers ! 🍑", "Coucou ma Puce, c’est ton coach 😘"],
+    c: ["Aujourd’hui c’est ta grande séance de fessiers 🍑🍑 on se motive ❤️",
+        "Séance cuisses & fessiers aujourd’hui : tu as tout l’après-midi pour t’y préparer dans ta tête 🧠💪",
+        "Je te prévois tôt pour que tu aies le temps de te motiver : séance de jambes aujourd’hui, tu vas assurer 🍑",
+        "Aujourd’hui, c’est séance ! Prépare ton sac maintenant, comme ça tout à l’heure il n’y a plus qu’à y aller 🎒",
+        "Cuisses & fessiers au programme aujourd’hui 🍑 Le plus dur, c’est de décider d’y aller : c’est déjà fait ✅",
+        "Dans quelques heures : hip thrust, presse, fentes… Tes fessiers se préparent déjà, et toi ? 😄",
+        "Ta séance de fessiers t’attend aujourd’hui 🍑🍑 Une série à la fois, comme d’habitude ❤️",
+        "Aujourd’hui on se donne à fond sur les cuisses & fessiers 🔥 Mets-toi en mode championne dès maintenant !",
+        "Pense à ta séance : musique motivante, tenue prête, bouteille d’eau, et le tour est joué 🎧💧",
+        "Tu as tout l’après-midi pour te mettre dans le bain : cuisses & fessiers aujourd’hui, et je suis fier de toi d’avance 💛",
+        "Visualise-toi déjà en train de finir ta dernière série aujourd’hui 🏁 Ça aide, promis !",
+        "Les fessiers n’ont pas oublié que c’est leur jour 🍑 Rendez-vous à la salle (ou au salon) tout à l’heure !",
+        "Ouvre FH Pulse quand tu es prête : tout est là, il n’y a plus qu’à appuyer sur « Démarrer » 💪",
+        "Aujourd’hui, petite victoire garantie : y aller. Le reste (les séries, les kilos), c’est du bonus 🏆",
+        "Dès que tu peux, mets ta tenue de sport 👟 Une fois habillée en mode sport, tu es déjà à moitié à la salle 😄",
+        "Astuce de coach : habille-toi en mode sport en attendant l’heure, ça aide vraiment à se motiver 🍑 À toi de jouer !",
+        "Prépare ton sac ET enfile ta tenue de sport : plus d’excuses possibles, ma Puce 😏🎒",
+        "Quand ta journée de boulot est finie : tenue de sport, musique, et direction la salle 🎧👟"] },
   train_late: {
     g: ["Ma Puce, dernier appel 📣", "Psst, ma Puce…", "Ding ! Dernier rappel, ma Puce 🔔", "Ma Puce, il est encore temps !"],
     c: ["Ta séance t’attend toujours : même 20 minutes de cuisses & fessiers, ça compte 💪",
@@ -165,23 +173,58 @@ const BANK = {
         "{n} jours sans entraînement. Je répète : {n} jours. Un petit squat pour me rassurer ? 😄",
         "Pas de reproche, juste de l’amour : {n} jours depuis ta dernière séance. Reprends en douceur, je suis avec toi 💛",
         "Négociations ouvertes avec tes fessiers : ils réclament une séance de hip thrust après {n} jours 🍑"] },
-  sunday_ok: {
-    g: ["Semaine validée, ma Puce ✅", "Dimanche soir, bilan : bravo ! 🏆", "Ma Puce, tu as tenu ta semaine 🎉"],
-    c: ["{done}/{goal} séances cette semaine : je suis très fier de toi. On remet ça lundi ?",
+  // bilan de la semaine PASSÉE, envoyé le lundi à midi (le week-end est réservé au repos)
+  week_ok: {
+    g: ["Bravo pour la semaine dernière, ma Puce ✅", "Lundi, bilan de la semaine : félicitations ! 🏆", "Ma Puce, tu avais tenu ta semaine 🎉"],
+    c: ["{done}/{goal} séances la semaine dernière : je suis très fier de toi. On remet ça cette semaine ?",
         "{done}/{goal} séances ! Tes cuisses et tes fessiers te font une standing ovation 👏",
-        "Objectif atteint ({done}/{goal}) ! Repose-toi bien, la semaine prochaine on garde le rythme 💪"] },
-  sunday_miss: {
-    g: ["Dimanche soir, ma Puce 📅", "Nouvelle semaine en vue, ma Puce !", "Petit bilan, ma Puce 📊"],
-    c: ["{done}/{goal} séances cette semaine. Pas grave : on repart de zéro, choisis tes créneaux et on y va 💪",
-        "{done}/{goal} cette semaine, la prochaine sera meilleure ! Bloque tes séances dans ton agenda 📅",
-        "Cette semaine : {done}/{goal}. Demain, on prend un bon départ : cuisses & fessiers au programme 🍑"] },
+        "Objectif atteint la semaine dernière ({done}/{goal}) ! On garde le rythme cette semaine 💪"] },
+  week_miss: {
+    g: ["Lundi, ma Puce 📅", "Nouvelle semaine en vue, ma Puce !", "Petit bilan, ma Puce 📊"],
+    c: ["{done}/{goal} séances la semaine dernière. Pas grave : on repart de zéro, et cette semaine on y va 💪",
+        "{done}/{goal} la semaine dernière, celle-ci sera meilleure ! Bloque tes séances dans ton agenda 📅",
+        "Semaine dernière : {done}/{goal}. Aujourd’hui on prend un bon départ : cuisses & fessiers au programme 🍑"] },
+  // samedi matin : elle peut aller à la salle avant de récupérer Tom à 16h30
+  sat_sport: {
+    g: ["Samedi matin, ma Puce 🌞", "Bon samedi, ma Puce ☀️", "Ma Puce, c’est samedi : jour de salle ! 🏋️", "Coucou ma Puce, ton coach te parle 🎤", "Alerte créneau salle, ma Puce 🚨", "Hop hop hop, ma Puce !"],
+    c: ["Tu as toute la matinée devant toi : une bonne séance cuisses & fessiers avant d’aller chercher Tom à 16h30 ? 🍑",
+        "Profites-en : samedi, pas de boulot, tu peux aller à la salle avant de récupérer Tom à 16h30 💪",
+        "Prépare ton sac maintenant, comme ça tu n’as plus qu’à partir à la salle quand tu veux 🎒 Tom t’attend à 16h30, tu as le temps !",
+        "Habille-toi en mode sport dès ce matin 👟 Quand on est déjà en tenue, on a presque fini d’y aller 😄 Séance avant les 16h30 de Tom !",
+        "Séance de fessiers ce matin ? 🍑🍑 Tu as largement le temps avant d’aller chercher Tom à 16h30 ❤️",
+        "Aujourd’hui, la salle t’attend : une petite séance avant 16h30, et ensuite tu profites de ton Tom l’esprit léger 💛",
+        "Mets de la musique, enfile ta tenue de sport et file à la salle : Tom sera ravi de retrouver une maman au top à 16h30 😍",
+        "Le week-end, c’est le moment idéal : pas de réveil, pas de boulot, juste toi et ta séance 🍑 Retour à temps pour les 16h30 de Tom !",
+        "Une heure pour toi ce matin : cuisses & fessiers, puis tu récupères Tom à 16h30 avec le sourire 😊",
+        "Même 30 minutes à la salle ce matin, ça compte ! Tu as jusqu’à 16h30 pour aller chercher Tom, alors lance FH Pulse quand tu veux 💪"] },
+  // samedi en fin d'après-midi (après avoir récupéré Tom) : que la séance ait eu lieu ou non
+  tom: {
+    g: ["Bravo pour ta journée, ma Puce 💛", "Maintenant, mode maman ❤️", "Coucou ma Puce 🌤️", "Bonne soirée en vue, ma Puce 🌆"],
+    c: ["Séance ou pas, profite bien de ton week-end avec ton Tom 🧸",
+        "Place au bonheur : câlins et bons moments avec Tom 💛",
+        "Tes fessiers récupèrent, toi tu profites de ton Tom 🍑😄",
+        "Pose ton téléphone et profite de Tom, je m’occupe du reste 🥰",
+        "Ce soir, pas de pression : juste du temps de qualité avec ton Tom ❤️"] },
+  // dimanche : repos complet
+  repos: {
+    g: ["Bon week-end, ma Puce 💛", "Repos mérité, ma Puce 😴", "Coucou ma Puce, c’est ton coach en congé 🏖️", "Aujourd’hui, mission repos, ma Puce 🛋️", "Petit mot du week-end, ma Puce 💌", "Pas de séance aujourd’hui, ma Puce ☀️"],
+    c: ["Profite bien de ton repos avec ton Tom 💛",
+        "Aujourd’hui c’est repos : câlins, jeux et fous rires avec Tom 🧸",
+        "Tes fessiers récupèrent, toi tu profites : un bon moment avec ton Tom 🍑😄",
+        "Ta seule mission du jour : t’amuser avec Tom 🎈",
+        "Repos bien mérité ! Profite de ton Tom, la salle t’attendra lundi 😉",
+        "Pose le téléphone et profite de ton Tom, je m’occupe du reste 🥰",
+        "Les muscles récupèrent pendant que tu fais le plein de bonheur avec ton Tom 💪💛",
+        "Un week-end tranquille avec ton Tom, c’est la meilleure des récupérations 🌤️",
+        "Rien à prouver aujourd’hui : juste de bons moments avec ton Tom ❤️",
+        "Repos total au programme : parc, jeux, goûter avec ton Tom… et le droit de ne rien faire 😌"] },
   finish: {
     g: ["Bravo ma Puce ! 👏", "Séance terminée, ma Puce !", "Tu l’as fait ! 🎉", "Chapeau ma Puce 🎩", "Quelle séance ! 🔥", "Mission accomplie, ma Puce ✅", "Ding ding ding, victoire ! 🏆", "Je suis tellement fier de toi, ma Puce 💛"],
     c: ["{sets_txt} en {min_txt} : tes cuisses et tes fessiers vont m’écrire pour te remercier 😄",
         "{sets_txt} dans la poche ! Ce soir, tu as droit à un canapé bien mérité 🛋️",
         "{min_txt} d’effort, {sets_txt} : tu as fait plus que ceux qui y pensaient seulement 😎",
         "Tes muscles travaillent déjà pour toi pendant que tu te reposes. Beau boulot ! ({sets_txt})",
-        "{sets_txt} terminées : la flemme a perdu, tu as gagné 🏅",
+        "{sets_txt} au compteur : la flemme a perdu, tu as gagné 🏅",
         "{min_txt} de séance ({sets_txt}) : tes fessiers te saluent bien bas 🍑🙇",
         "Tu avais dit « peut-être demain », tu as dit oui aujourd’hui. J’adore ça ! ({sets_txt})",
         "{sets_txt}, zéro excuse, 100 % championne 💪"],
@@ -202,9 +245,23 @@ function pickIndex(len, recent, rng) {
 }
 // variantes déjà utilisées : "g:c" ou "g:c:r…" → liste des g récents et des c récents
 function recentOf(recentVariants, pos) { return recentVariants.map((v) => String(v).split(":")[pos]).filter((x) => x !== undefined && x !== "" && x !== "-"); }
+// Choix de l'accroche (g) et du fond (c) : jamais deux fois le même message complet (g:c) dans les derniers envois,
+// et, tant que possible, ni la même phrase de fond sur plusieurs jours, ni la même accroche deux jours de suite.
+function pickPair(B, recentVariants, rng) {
+  const used = new Set(recentVariants.map((v) => String(v).split(":").slice(0, 2).join(":")));
+  const lastG = recentOf(recentVariants, 0).map(Number), lastC = recentOf(recentVariants, 1).map(Number);
+  const avoidG = new Set(lastG.slice(0, Math.min(B.g.length - 1, 3))), avoidC = new Set(lastC.slice(0, Math.min(B.c.length - 1, 8)));
+  const t1 = [], t2 = [], t3 = [], all = [];
+  for (let gi = 0; gi < B.g.length; gi++) for (let ci = 0; ci < B.c.length; ci++) {
+    all.push([gi, ci]); if (used.has(gi + ":" + ci)) continue;
+    if (!avoidC.has(ci) && !avoidG.has(gi)) t1.push([gi, ci]); else if (!avoidC.has(ci)) t2.push([gi, ci]); else t3.push([gi, ci]);
+  }
+  const pool = t1.length ? t1 : t2.length ? t2 : t3.length ? t3 : all;
+  return pool[Math.floor(rng() * pool.length)];
+}
 function composeMessage(kind, ctx, recentVariants = [], rng = Math.random) {
   const B = BANK[kind]; if (!B) throw new Error("type de message inconnu : " + kind);
-  const gi = pickIndex(B.g.length, recentOf(recentVariants, 0), rng), ci = pickIndex(B.c.length, recentOf(recentVariants, 1), rng);
+  const [gi, ci] = pickPair(B, recentVariants, rng);
   let text = B.g[gi] + " " + B.c[ci], variant = gi + ":" + ci;
   if (kind === "finish") {
     const recs = ctx.recs || [];
@@ -233,27 +290,32 @@ const hm = (s, d) => { const m = /^(\d{1,2}):(\d{2})/.exec(String(s || "")); ret
 // Ce que le coach sait de la personne, d'après son historique de séances
 function profileFacts(history, goal, nowMs) {
   const today = parisParts(nowMs); const days = new Set(); let last = -Infinity;
-  const weekStart = dayNumber(today.day) - (today.wd - 1); let done = 0;
-  for (const ts of history || []) { if (typeof ts !== "number") continue; const d = parisParts(ts).day; days.add(d); const n = dayNumber(d); if (n > last) last = n; if (n >= weekStart && n <= weekStart + 6) done++; }
-  return { trainedToday: days.has(today.day), daysSince: last === -Infinity ? null : dayNumber(today.day) - last, done, goal: Number.isInteger(goal) && goal >= 1 && goal <= 7 ? goal : 3 };
+  const weekStart = dayNumber(today.day) - (today.wd - 1); let done = 0, prevDone = 0;
+  for (const ts of history || []) { if (typeof ts !== "number") continue; const d = parisParts(ts).day; days.add(d); const n = dayNumber(d); if (n > last) last = n; if (n >= weekStart && n <= weekStart + 6) done++; else if (n >= weekStart - 7 && n < weekStart) prevDone++; }
+  return { trainedToday: days.has(today.day), daysSince: last === -Infinity ? null : dayNumber(today.day) - last, done, prevDone, goal: Number.isInteger(goal) && goal >= 1 && goal <= 7 ? goal : 3 };
 }
 
-// Messages dus à l'instant `nowMs` pour un abonné (liste de { kind, at, ctx })
+// Messages dus à l'instant `nowMs` pour un abonné (liste de { kind, at, ctx }).
+// Lundi à vendredi : rappel de séance à 15h (jours de séance), encouragements, bilan de la semaine passée le lundi à 12h30.
+// Samedi : message pour aller à la salle le matin (avant de récupérer Tom à 16h30), puis un mot pour Tom ; dimanche : repos complet. Les repas continuent tous les jours.
 function dueForOwner(sub, facts, nowMs, recentComeback = false) {
-  const t = parisParts(nowMs); const trainDays = Array.isArray(sub.train_days) && sub.train_days.length ? sub.train_days : [1, 3, 5];
+  const t = parisParts(nowMs); const weekend = t.wd >= 6;
+  const trainDays = (Array.isArray(sub.train_days) && sub.train_days.length ? sub.train_days : [1, 3, 5]).filter((d) => d <= 5); // jamais le week-end
   const isTrain = trainDays.includes(t.wd); const slots = [];
   slots.push({ kind: "breakfast", at: 9 * 60 });
   slots.push({ kind: "snack", at: 15 * 60 + 30 + (hashStr(t.day + sub.owner_key) % 76) }); // une heure « au hasard » entre 15h30 et 16h45
   slots.push({ kind: "choco", at: 20 * 60 + 30 });
-  if (isTrain && !facts.trainedToday) { slots.push({ kind: "train", at: hm(sub.train_time, 17 * 60 + 30) }); slots.push({ kind: "train_late", at: 19 * 60 + 30 }); }
-  if (!isTrain && t.wd !== 7) { slots.push({ kind: "motiv", at: 12 * 60 + 30 }); if (facts.daysSince !== null && facts.daysSince >= 4 && !facts.trainedToday && !recentComeback) slots.push({ kind: "comeback", at: 18 * 60, ctx: { n: facts.daysSince } }); }
-  if (t.wd === 7) slots.push({ kind: facts.done >= facts.goal ? "sunday_ok" : "sunday_miss", at: 19 * 60, ctx: { done: facts.done, goal: facts.goal } });
-  return slots.filter((s) => t.min >= s.at && t.min < s.at + GRACE_MIN).map((s) => ({ ...s, day: t.day }));
+  if (isTrain && !facts.trainedToday) { slots.push({ kind: "train", at: hm(sub.train_time, 15 * 60) }); slots.push({ kind: "train_late", at: 19 * 60 + 30 }); }
+  if (!weekend && !isTrain && t.wd !== 1) { slots.push({ kind: "motiv", at: 12 * 60 + 30 }); if (facts.daysSince !== null && facts.daysSince >= COMEBACK_DAYS && !facts.trainedToday && !recentComeback) slots.push({ kind: "comeback", at: 18 * 60, ctx: { n: facts.daysSince } }); }
+  if (t.wd === 6) { if (!facts.trainedToday) slots.push({ kind: "sat_sport", at: 9 * 60 + 10 }); slots.push({ kind: "tom", at: 17 * 60 + 30 }); } // samedi : séance possible le matin (message à 9h10, juste après les omelettes) ; mot sur Tom en fin d'après-midi
+  if (t.wd === 7) slots.push({ kind: "repos", at: 10 * 60 + 30 });                                                                                         // dimanche : repos complet
+  if (t.wd === 1 && facts.daysSince !== null) slots.push({ kind: facts.prevDone >= facts.goal ? "week_ok" : "week_miss", at: 12 * 60 + 30, ctx: { done: facts.prevDone, goal: facts.goal } });
+  return slots.filter((x) => t.min >= x.at && t.min < x.at + GRACE_MIN).map((x) => ({ ...x, day: t.day }));
 }
 
 // Un exemple de chaque type de message (pour tester sur UN appareil sans attendre l'heure prévue)
-const SAMPLE_KINDS = ["breakfast", "snack", "choco", "train", "train_late", "motiv", "comeback", "sunday_ok", "sunday_miss", "finish"];
-const SAMPLE_CTX = { comeback: { n: 5 }, sunday_ok: { done: 3, goal: 3 }, sunday_miss: { done: 1, goal: 3 }, finish: { sets: 12, minutes: 48, recs: ["Hip thrust barre"], done: 2, goal: 3 } };
+const SAMPLE_KINDS = ["breakfast", "snack", "choco", "train", "train_late", "motiv", "comeback", "week_ok", "week_miss", "sat_sport", "tom", "repos", "finish"];
+const SAMPLE_CTX = { comeback: { n: 5 }, week_ok: { done: 3, goal: 3 }, week_miss: { done: 1, goal: 3 }, finish: { sets: 12, minutes: 48, recs: ["Hip thrust barre"], done: 2, goal: 3 } };
 function sampleMessage(kind, rng = Math.random) {
   if (!BANK[kind] || kind === "test") throw new Error("type inconnu : " + kind);
   return { kind, text: composeMessage(kind, SAMPLE_CTX[kind] || {}, [], rng).text };
@@ -264,6 +326,7 @@ function sampleMessage(kind, rng = Math.random) {
 async function runTick({ db, send, now = Date.now(), rng = Math.random, coachName = COACH_NAME_DEFAULT }) {
   const report = { sent: [], skipped: 0, removed: 0, errors: [] };
   const vapid = await ensureVapid(db);
+  { const tp = parisParts(now); if (tp.min >= 240 && tp.min < 240 + GRACE_MIN && db.pruneInbox && await db.claimLog("_systeme", "nettoyage", tp.day, "…", now)) await db.pruneInbox(now - 90 * DAY_MS); } // une fois par nuit
   const subs = await db.listCoachSubs(); if (!subs.length) return report;
   const byOwner = new Map(); for (const s of subs) { if (!byOwner.has(s.owner_key)) byOwner.set(s.owner_key, []); byOwner.get(s.owner_key).push(s); }
   const facts = new Map();
@@ -271,16 +334,18 @@ async function runTick({ db, send, now = Date.now(), rng = Math.random, coachNam
 
   async function deliver(owner, kind, ctx, day, variantKey) {
     const list = byOwner.get(owner);
-    const recent = await db.recentVariants(owner, kind, 12);
+    const recent = await db.recentVariants(owner, kind, 60); // on se souvient des 60 derniers envois de ce type
     const msg = composeMessage(kind === "test" ? "test" : kind, ctx, recent, rng);
-    const payload = JSON.stringify({ title: coachName, body: msg.text, tag: "coach-" + kind, url: "./", icon: "icon-192.png", badge: "badge-96.png" });
+    const payload = JSON.stringify({ title: coachName, body: msg.text, tag: "coach-" + kind, url: "./#messages", icon: "icon-192.png", badge: "badge-96.png" }); // « #messages » : un appui sur la notification ouvre la cloche
     let anyOk = false, transient = false;
     for (const sub of list) {
       const r = await send(sub, payload, vapid, kind);
       if (r.ok) { anyOk = true; await db.markSub(sub.id, { ok: true }); }
       else if (r.gone) { await db.deleteSub(sub.id); report.removed++; }
-      else { transient = transient || r.status === 0 || r.status === 429 || r.status >= 500; await db.markSub(sub.id, { ok: false, error: "HTTP " + r.status + " " + (r.text || "") }); report.errors.push({ owner, kind, status: r.status }); }
+      else { transient = transient || r.status === 0 || r.status === 429 || r.status >= 500; await db.markSub(sub.id, { ok: false, error: "HTTP " + r.status + " " + (r.text || "") }); report.errors.push({ owner, kind, status: r.status, reponse: String(r.text || "").slice(0, 160) }); }
     }
+    // la cloche garde le message (une seule fois, même avec plusieurs appareils) ; si l'envoi sera réessayé, on attend pour ne pas le garder en double
+    if (anyOk || !transient) { try { if (db.addInbox) await db.addInbox(owner, kind, coachName, msg.text); } catch (e) { report.errors.push({ owner, kind, inbox: String((e && e.message) || e) }); } }
     report.sent.push({ owner, kind, text: msg.text, variant: msg.variant, ok: anyOk, devices: list.length });
     return { anyOk, transient, variant: msg.variant };
   }
@@ -378,6 +443,8 @@ function makeDb() {
     async claimQueue(now) { // « prend » les messages dus en une seule requête : une même ligne ne peut pas être envoyée deux fois
       return (await pg("tempo_push_queue?sent_at=is.null&due_at=lte." + q(iso(now)), { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ sent_at: iso(now) }) })) || [];
     },
+    async addInbox(owner, kind, title, body) { await pg("tempo_inbox", { method: "POST", body: JSON.stringify({ owner_key: owner, kind, title, body }) }); },
+    async pruneInbox(beforeMs) { await pg("tempo_inbox?created_at=lt." + q(iso(beforeMs)), { method: "DELETE" }); },
     async enqueue(owner, kind, payload, dueMs) { await pg("tempo_push_queue", { method: "POST", body: JSON.stringify({ owner_key: owner, kind, payload, due_at: iso(dueMs) }) }); },
   };
 }
@@ -387,8 +454,10 @@ const TTL = { finish: 1800, test: 600 };
 const hint = (st) => st === 404 || st === 410 ? "L'appareil n'est plus abonné : réactive les notifications dans la carte de l'appli, puis relis l'identifiant."
   : st === 400 || st === 401 || st === 403 ? "Le service (Apple ou Google) refuse l'identification de l'expéditeur : donne-moi la « reponse_du_service »."
   : st === 413 ? "Message trop long." : st === 429 ? "Trop d'envois : attends quelques minutes." : st >= 500 ? "Panne passagère du service de notification : réessaie dans un instant." : "Réponse inattendue du service.";
-const send = (sub, payload, vapid, kind) => sendWebPush(sub, payload, { vapid, subject: SITE_URL, ttl: TTL[kind] || 7200, topic: String(kind).slice(0, 32) });
-const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
+// Pas d'en-tête « Topic » : Apple le refuse (erreur 400 BadWebPushTopic) et il n'est pas nécessaire.
+const send = (sub, payload, vapid, kind) => sendWebPush(sub, payload, { vapid, subject: SITE_URL, ttl: TTL[kind] || 7200 });
+const FN_VERSION = "2026-11-06 20:53"; // date de fabrication de ce code : permet de vérifier quelle version est réellement déployée
+const json = (obj, status = 200) => new Response(JSON.stringify({ version: FN_VERSION, ...obj }), { status, headers: { "Content-Type": "application/json" } });
 function sameSecret(a, b) { if (!a || !b || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
 
 async function handle(req) {
@@ -406,7 +475,7 @@ async function handle(req) {
       const vapid = await ensureVapid(db); const sent = [];
       for (const k of kinds) {
         const msg = sampleMessage(k);
-        const r = await send(rows[0], JSON.stringify({ title: COACH_NAME, body: msg.text, tag: "coach-" + k, url: "./", icon: "icon-192.png", badge: "badge-96.png" }), vapid, "test");
+        const r = await send(rows[0], JSON.stringify({ title: COACH_NAME, body: msg.text, tag: "coach-" + k, url: "./#messages", icon: "icon-192.png", badge: "badge-96.png" }), vapid, "test");
         sent.push(r.ok ? { type: k, ok: true, statut: r.status } : { type: k, ok: false, statut: r.status, reponse_du_service: r.text, aide: hint(r.status) });
         await db.markSub(rows[0].id, r.ok ? { ok: true } : { ok: false, error: "HTTP " + r.status + " " + (r.text || "") });
         if (r.gone) { await db.deleteSub(rows[0].id); break; }
