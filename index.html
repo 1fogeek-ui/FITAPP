@@ -1382,15 +1382,22 @@
     p.history.forEach((r) => { const it = (r.items || []).find((x) => x.id === cid); if (it && it.log && it.log.length && (r.date || 0) >= bd) { best = it.log; bd = r.date || 0; } });
     return best;
   }
-  // Valeurs proposées pour une série : celles avec lesquelles on DÉBUTE l'exercice (jamais le maximum atteint) :
-  //  - 1re série du jour : la 1re série de la dernière séance où on a fait cet exercice ;
-  //  - ensuite : la 1re série d'aujourd'hui (poids et répétitions de départ, ajustés par vos soins) ;
-  //  - jamais fait : 10 répétitions, sans poids.
+  // Poids de DÉPART d'un exercice d'après une séance passée : la série la plus légère (le minimum pour commencer), pas la charge où on avait fini.
+  // Les séries sans poids sont ignorées s'il y en a avec poids ; à égalité, la première. Poids du corps : la première série.
+  function startOf(log) {
+    const withW = log.filter((x) => (x.w || 0) > 0); const pool = withW.length ? withW : log;
+    let best = pool[0]; pool.forEach((x) => { if ((x.w || 0) < (best.w || 0)) best = x; });
+    return { w: best.w || 0, r: best.r || 0 };
+  }
+  // Valeurs proposées pour une série :
+  //  - 1re série de l'exercice : le poids de départ de la dernière séance où on l'a fait (voir startOf), jamais la dernière charge ;
+  //  - ensuite : la série qui vient d'être faite, avec le poids et les répétitions qu'on vient de régler (on garde la charge qu'on vient de monter) ;
+  //  - exercice jamais fait : 10 répétitions, sans poids.
   function suggestFor(cid) {
     const mine = S.log.filter((e) => e.id === cid);
-    if (mine.length) return { w: mine[0].w, r: mine[0].r };
+    if (mine.length) { const prev = mine[mine.length - 1]; return { w: prev.w, r: prev.r }; }
     const ls = lastSessionSets(cid);
-    return ls ? { w: ls[0].w, r: ls[0].r } : { w: 0, r: 10 };
+    return ls ? startOf(ls) : { w: 0, r: 10 };
   }
   // Que modifie la carte de saisie ?
   //  - série en cours : cette série (« live ») ;
@@ -1548,7 +1555,7 @@
       if (opts && opts.quick) box.append(h("div", { class: "quick" }, btn("−5", -5, "Moins 5 kg · " + label), btn("+5", 5, "Plus 5 kg · " + label)));
       return box;
     };
-    const firstSet = (id) => { const ls = lastSessionSets(id); return ls ? { w: ls[0].w, r: ls[0].r } : { w: 0, r: 10 }; }; // la 1re série reprend le départ de la dernière séance
+    const firstSet = (id) => { const ls = lastSessionSets(id); return ls ? startOf(ls) : { w: 0, r: 10 }; }; // la 1re série reprend le poids de départ de la dernière séance
     const paintItems = () => {
       itemsBox.replaceChildren();
       if (!draft.items.length) { itemsBox.append(h("p", { class: "muted small", style: "margin:6px 2px 0", text: "Exercices (facultatif) : choisissez-les ci-dessous pour garder aussi les poids et les répétitions dans vos statistiques. Sans exercice, seule la séance est comptée." })); return; }
@@ -2181,7 +2188,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "6 nov. 2026 · 10:10 · afe0da"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "6 nov. 2026 · 16:54 · 24f90c"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
