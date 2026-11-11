@@ -417,8 +417,23 @@
   .pset .ob { margin-top: 4px; }
   .padd { margin-top: 10px; width: 100%; }
   .hs-t { display: block; margin-top: 2px; font-size: .78rem; font-weight: 600; color: var(--muted); }
-  .sc-done { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 0 10px; padding: 8px 12px; border-radius: 12px; background: rgba(205,240,120,.08); border: 1px solid rgba(205,240,120,.25); font-size: .88rem; }
-  .sc-done[hidden] { display: none; }
+  .setsdone { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 16px; text-align: left; }
+  .sd-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .sd-head b { font-size: 1rem; }
+  .sd-head span { font-size: .78rem; color: var(--muted); }
+  .sd-ex { margin-top: 12px; }
+  .sd-exh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .sd-exh b { font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sd-ex.cur .sd-exh b { color: var(--accent); }
+  .sd-exh span, .sd-set .muted { font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .sd-set { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 6px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,.03); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .sd-set:active { background: rgba(255,255,255,.08); }
+  .sd-edit { color: var(--muted); font-size: .9rem; }
+  .sd-set.live { border-color: var(--accent); background: rgba(205,240,120,.08); }
+  .sd-n { flex: 0 0 22px; text-align: center; font-weight: 800; color: var(--muted); }
+  .sd-v { flex: 1; font-weight: 700; }
+  .sd-tag { font-size: .72rem; font-weight: 800; letter-spacing: .06em; color: var(--accent); text-transform: uppercase; }
+  .sd-empty { margin: 6px 2px 0; font-size: .85rem; color: var(--muted); }
   .sc-note { display: block; width: 100%; text-align: left; border: 1px dashed var(--line-2); background: transparent; color: var(--muted); border-radius: 12px; padding: 8px 12px; margin: 0 0 10px; font-size: .85rem; line-height: 1.3; }
   .sc-note.has { border-style: solid; border-color: rgba(205,240,120,.35); background: rgba(205,240,120,.07); color: var(--text); }
   .notebox { border: 1px solid var(--line-2); border-radius: 14px; padding: 12px; display: grid; gap: 8px; justify-items: start; }
@@ -519,13 +534,16 @@
         <section class="setcard" id="setCard" hidden>
           <div class="sc-head"><b id="scTitle">Série</b><span id="scSub"></span></div>
           <button type="button" class="sc-note" id="scNote" hidden></button>
-          <div class="sc-done" id="scDone" hidden><span id="scDoneTxt"></span><button type="button" class="linkbtn" id="scDoneBtn">Corriger</button></div>
           <div class="sc-grid" id="scFields">
             <div class="sc-f"><label for="wIn">POIDS (kg)</label><div class="step"><button type="button" id="wMinus" aria-label="Moins 1 kg">−</button><input id="wIn" type="number" inputmode="decimal" min="0" step="0.5" value="0"><button type="button" id="wPlus" aria-label="Plus 1 kg">+</button></div>
             <div class="quick"><button type="button" id="wMinus5" aria-label="Moins 5 kg">−5</button><button type="button" id="wPlus5" aria-label="Plus 5 kg">+5</button></div></div>
             <div class="sc-f"><label for="rIn">RÉPÉTITIONS</label><div class="step"><button type="button" id="rMinus" aria-label="Moins une répétition">−</button><input id="rIn" type="number" inputmode="numeric" min="0" step="1" value="0"><button type="button" id="rPlus" aria-label="Plus une répétition">+</button></div></div>
           </div>
           <p class="sc-prev" id="scPrev"></p>
+        </section>
+        <section class="setsdone" id="setsDone" hidden aria-label="Séries de la séance">
+          <div class="sd-head"><b>Séries de la séance</b><span id="sdCount"></span></div>
+          <div id="sdBody"></div>
         </section>
         <div class="stats" aria-label="Temps de la séance">
           <div><span class="stat-label">EXERCICE</span><strong id="exTotal">00:00</strong><small>Temps actif</small></div>
@@ -1231,7 +1249,7 @@
   };
   el.progress.style.strokeDasharray = CIRC;
 
-  const fresh = () => ({ pid: null, sessionStart: null, mode: null, totals: { exercise: 0, rest: 0 }, curAccum: 0, segStart: null, paused: false, sets: 0, alerted: false, curEx: null, modeEx: null, perEx: {}, log: [], pend: { id: undefined, w: 0, r: 10 }, editPrev: false, pendDirty: false, name: null });
+  const fresh = () => ({ pid: null, sessionStart: null, mode: null, totals: { exercise: 0, rest: 0 }, curAccum: 0, segStart: null, paused: false, sets: 0, alerted: false, curEx: null, modeEx: null, perEx: {}, log: [], pend: { id: undefined, w: 0, r: 10 }, pendDirty: false, name: null });
   let S = fresh();
   let audioCtx = null, wakeLock = null, ticker = null;
 
@@ -1289,10 +1307,10 @@
     const now = Date.now();
     if (!sessionActive()) startSession(now);
     if (S.mode === next && next === "exercise") { if (S.paused) togglePause(); return; }
-    const tv = next === "exercise" ? (() => { const t = targetFor(); if (t.kind === "prev") { const n2 = suggestFor(getCurEx() || null); return { w: n2.w, r: n2.r }; } return { w: t.obj.w, r: t.obj.r }; })() : null;
+    const tv = next === "exercise" ? (() => { const t = targetFor(); return { w: t.obj.w, r: t.obj.r }; })() : null;
     const prevMode = S.mode, prevEx = S.modeEx;
     closeMode(now);
-    S.mode = next; S.segStart = now; S.alerted = false; S.editPrev = false;
+    S.mode = next; S.segStart = now; S.alerted = false;
     if (next === "rest" && prevMode === "exercise") { S.pend = Object.assign({ id: prevEx || null }, suggestFor(prevEx || null)); S.pendDirty = false; } // la prochaine série est prête : on peut la régler pendant le repos
     if (next === "exercise") {
       S.pendDirty = false;
@@ -1407,48 +1425,80 @@
   }
   // Que modifie la carte de saisie ?
   //  - série en cours : cette série (« live ») ;
-  //  - pendant le repos : la PROCHAINE série (« next »), pour la préparer ; la série qui vient de finir reste modifiable via « Corriger » (« prev ») ;
-  //  - avant la première série : la prochaine série (« next »).
+  //  - pendant le repos et avant la première série : la PROCHAINE série (« next »), pour la préparer.
+  //  Les séries déjà faites se corrigent depuis la liste « Séries de la séance ».
   function targetFor() {
     const cid = getCurEx() || null; const last = S.log[S.log.length - 1];
     if (S.mode === "exercise" && last) return { obj: last, kind: "live" };
-    if (S.mode === "rest" && last && last.id === cid && S.editPrev) return { obj: last, kind: "prev" };
     if (S.pend.id !== cid) { S.pend = Object.assign({ id: cid }, suggestFor(cid)); S.pendDirty = false; }
     return { obj: S.pend, kind: "next" };
   }
-  const sc = { done: $("scDone"), doneTxt: $("scDoneTxt"), doneBtn: $("scDoneBtn"), note: $("scNote"), box: $("setCard"), title: $("scTitle"), sub: $("scSub"), prev: $("scPrev"), fields: $("scFields"), w: $("wIn"), r: $("rIn") };
+  const sc = { note: $("scNote"), box: $("setCard"), title: $("scTitle"), sub: $("scSub"), prev: $("scPrev"), fields: $("scFields"), w: $("wIn"), r: $("rIn") };
   sc.note.addEventListener("click", () => { const c = getCurEx(); if (c) openNoteEditor(c); });
   const parseNum = (v) => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n >= 0 ? n : 0; };
+  /* ---------- Séries déjà faites pendant la séance (visibles sans attendre la fin) ---------- */
+  // modifier (ou supprimer) n'importe quelle série de la séance en cours
+  function afterSetEdit() {
+    saveS(); const cid = getCurEx() || null;
+    if (S.mode !== "exercise" && !S.pendDirty && S.pend.id === cid) S.pend = Object.assign({ id: cid }, suggestFor(cid)); // la prochaine série tient compte de la correction
+    renderSetCard(true);
+  }
+  function openSetEditor(st) {
+    const ex = st.id ? exInfo(st.id) : null; const name = ex ? ex.name : "Série libre";
+    const same = S.log.filter((e) => e.id === st.id); const k = same.indexOf(st) + 1; const live = S.mode === "exercise" && st === S.log[S.log.length - 1];
+    const lab = (t, node) => h("div", { class: "sc-f" }, h("label", { text: t }), node);
+    const grid = h("div", { class: "sc-grid" }, lab("POIDS (kg)", stepperEl(st, "w", "Poids · série " + k + " · " + name, 1, { quick: true, after: afterSetEdit })), lab("RÉPÉTITIONS", stepperEl(st, "r", "Répétitions · série " + k + " · " + name, 1, { after: afterSetEdit })));
+    const foot = h("div", { class: "stack" }, h("button", { class: "btn primary block", type: "button", onclick: () => { closeSheet(); renderSetCard(true); } }, "Terminé"));
+    let armed = false;
+    if (!live) { const del = h("button", { class: "btn block danger", type: "button", onclick: () => {
+      if (!armed) { armed = true; del.textContent = "Confirmer la suppression"; return; }
+      const i = S.log.indexOf(st); if (i < 0) { closeSheet(); return; }
+      S.log.splice(i, 1); S.sets = Math.max(0, (S.sets || 0) - 1); const pp = S.perEx[st.id]; if (pp) { pp.sets = Math.max(0, (pp.sets || 0) - 1); pp.ms = Math.max(0, (pp.ms || 0) - (st.ms || 0)); }
+      S.pendDirty = false; S.pend = { id: undefined, w: 0, r: 10 }; saveS(); closeSheet(); render(); renderSetCard(true); toast("Série supprimée"); renderGoalBar();
+    } }, "Supprimer cette série"); foot.append(del); }
+    openSheet("Série " + k + " · " + name, [h("div", { class: "stack", style: "padding-top:6px" }, h("p", { class: "muted small", style: "margin:0", text: live ? "Série en cours : tes réglages sont enregistrés tout de suite." : "Tes changements sont enregistrés tout de suite." }), grid)], foot);
+  }
+  const sd = { box: $("setsDone"), count: $("sdCount"), body: $("sdBody") }; let sdSig = "";
+  function renderSetsDone() {
+    const log = S.log || []; sd.box.hidden = !sessionActive() || !log.length; if (sd.box.hidden) { sdSig = ""; return; }
+    const cid = getCurEx() || null;
+    const sig = JSON.stringify([cid, S.mode, !!ui.sdAll, log.map((e) => [e.id, e.w, e.r, e.ms])]); if (sig === sdSig) return; sdSig = sig;
+    const order = []; for (let i = log.length - 1; i >= 0; i--) if (!order.includes(log[i].id)) order.push(log[i].id);   // du plus récent au plus ancien
+    const others = order.filter((id) => id !== cid); const live = S.mode === "exercise" ? log[log.length - 1] : null;
+    const group = (id, cur) => {
+      const ex = id ? exInfo(id) : null; const sets = log.filter((e) => e.id === id);
+      const g = h("div", { class: "sd-ex" + (cur ? " cur" : "") }, h("div", { class: "sd-exh" }, h("b", { text: ex ? ex.name : "Séries libres" }), h("span", { class: "muted", text: sets.length ? plural(sets.length, "série") : "" })));
+      if (!sets.length) g.append(h("p", { class: "sd-empty", text: "Pas encore de série pour cet exercice." }));
+      sets.forEach((st, k) => g.append(h("button", { class: "sd-set" + (st === live ? " live" : ""), type: "button", "aria-label": "Modifier la série " + (k + 1) + " · " + (ex ? ex.name : "Série libre"), onclick: () => openSetEditor(st) }, h("span", { class: "sd-n", text: String(k + 1) }), h("span", { class: "sd-v", text: setText({ w: st.w, r: st.r, ms: st.ms }) }), st === live ? h("span", { class: "sd-tag", text: "en cours" }) : st.ms > 0 && (st.w > 0 || st.r > 0) ? h("span", { class: "muted", text: fmt(st.ms) }) : null, h("span", { class: "sd-edit", "aria-hidden": "true", text: "✎" }))));
+      return g;
+    };
+    sd.count.textContent = plural(log.length, "série"); sd.body.replaceChildren(group(cid, true));
+    if (others.length) {
+      sd.body.append(h("button", { class: "linkbtn", type: "button", style: "margin-top:8px", onclick: () => { ui.sdAll = !ui.sdAll; renderSetsDone(); } }, ui.sdAll ? "Masquer les autres exercices" : "Voir les autres exercices (" + others.length + ")"));
+      if (ui.sdAll) others.forEach((id) => sd.body.append(group(id, false)));
+    }
+  }
   function renderSetCard(force) {
     sc.box.hidden = !sessionActive();
-    if (sc.box.hidden) return;
+    if (sc.box.hidden) { renderSetsDone(); return; }
     const t = targetFor(); const cid = getCurEx() || null; const info = cid ? exInfo(cid) : null;
     const cardio = !!info && /^Cardio/.test(info.cats[0]);
     sc.title.textContent = info ? info.name : "Série libre";
     { const nt = cid && prof().notes ? prof().notes[cid] : ""; sc.note.hidden = !cid; sc.note.className = "sc-note" + (nt ? " has" : ""); sc.note.textContent = nt ? "Note : " + nt : "＋ Ajouter une note (réglages, astuce…)"; }
     const same = S.log.filter((e) => e.id === (t.kind === "next" ? cid : t.obj.id));
     const n = t.kind === "next" ? same.length + 1 : Math.max(1, same.indexOf(t.obj) + 1);
-    sc.sub.textContent = t.kind === "live" ? `Série ${n} · en cours` : t.kind === "prev" ? `Série ${n} · terminée (correction)` : `Prochaine · série ${n}`;
-    { // pendant le repos : rappel de la série qui vient de finir, avec un bouton pour la corriger (ou pour revenir à la prochaine)
-      const lastSet = S.log[S.log.length - 1]; const show = S.mode === "rest" && !!lastSet && lastSet.id === cid && !cardio;
-      sc.done.hidden = !show;
-      if (show) { const k = S.log.filter((e) => e.id === cid).indexOf(lastSet) + 1; sc.doneTxt.textContent = S.editPrev ? `Tu corriges la série ${k}` : `Série ${k} terminée : ${setText({ w: lastSet.w, r: lastSet.r, ms: lastSet.ms })}`; sc.doneBtn.textContent = S.editPrev ? "Revenir à la prochaine" : "Corriger"; }
-    }
+    sc.sub.textContent = t.kind === "live" ? `Série ${n} · en cours` : `Prochaine · série ${n}`;
     sc.fields.hidden = cardio;
     if (force || (document.activeElement !== sc.w && document.activeElement !== sc.r)) { sc.w.value = String(t.obj.w) /* un champ numérique n’accepte que le point décimal */; sc.r.value = String(t.obj.r); }
     const ls = lastSessionSets(cid);
     sc.prev.textContent = cardio ? "Cardio : le temps est enregistré dans la séance."
       : ls ? "Dernière séance : " + ls.map(setLine).join(" · ")
       : "Pas encore d’historique pour cet exercice. Les valeurs sont enregistrées automatiquement.";
+    renderSetsDone();
   }
   function bump(key, d) { const t = targetFor(); t.obj[key] = Math.max(0, Math.round((t.obj[key] + d) * 100) / 100); if (t.kind === "next") S.pendDirty = true; saveS(); renderSetCard(true); }
-  sc.w.addEventListener("input", () => { const t = targetFor(); t.obj.w = parseNum(sc.w.value); if (t.kind === "next") S.pendDirty = true; saveS(); });
-  sc.r.addEventListener("input", () => { const t = targetFor(); t.obj.r = Math.round(parseNum(sc.r.value)); if (t.kind === "next") S.pendDirty = true; saveS(); });
-  sc.doneBtn.addEventListener("click", () => {
-    const cid = getCurEx() || null; S.editPrev = !S.editPrev;
-    if (!S.editPrev && !S.pendDirty) S.pend = Object.assign({ id: cid }, suggestFor(cid)); // retour à la prochaine série : ses valeurs tiennent compte de la correction
-    saveS(); renderSetCard(true);
-  });
+  sc.w.addEventListener("input", () => { const t = targetFor(); t.obj.w = parseNum(sc.w.value); if (t.kind === "next") S.pendDirty = true; saveS(); renderSetsDone(); });
+  sc.r.addEventListener("input", () => { const t = targetFor(); t.obj.r = Math.round(parseNum(sc.r.value)); if (t.kind === "next") S.pendDirty = true; saveS(); renderSetsDone(); });
   $("wMinus").addEventListener("click", () => bump("w", -1));      // − / + : 1 kg
   $("wMinus5").addEventListener("click", () => bump("w", -5));    // petits boutons : 5 kg
   $("wPlus").addEventListener("click", () => bump("w", 1));
@@ -1519,6 +1569,19 @@
     openSheet(draft.id ? "Modifier la séance" : "Nouvelle séance", [h("div", { class: "stack", style: "padding-top:6px" }, name, err, orderBox), bro.el], foot);
   }
 
+  /* ---------- Poids / répétitions avec boutons − / + (le poids a aussi −5 / +5) ---------- */
+  function stepperEl(obj, key, label, step, opts) {
+    const after = (opts && opts.after) || (() => {});
+    const inp = h("input", { type: "number", inputmode: key === "w" ? "decimal" : "numeric", min: "0", step: key === "w" ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
+    inp.value = String(obj[key]);
+    const put = (v) => { obj[key] = key === "r" ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); after(); };
+    inp.addEventListener("input", () => { const n = parseFloat(String(inp.value).replace(",", ".")); obj[key] = isFinite(n) && n >= 0 ? (key === "r" ? Math.round(n) : n) : 0; after(); });
+    const btn = (txt, d, aria) => h("button", { type: "button", "aria-label": aria, onclick: () => put(obj[key] + d) }, txt);
+    const box = h("div", null, h("div", { class: "step" }, btn("−", -step, "Moins " + step + (key === "w" ? " kg" : " répétition") + " · " + label), inp, btn("+", step, "Plus " + step + (key === "w" ? " kg" : " répétition") + " · " + label)));
+    if (opts && opts.quick) box.append(h("div", { class: "quick" }, btn("−5", -5, "Moins 5 kg · " + label), btn("+5", 5, "Plus 5 kg · " + label)));
+    return box;
+  }
+
   /* ---------- Ajouter une séance passée (si on a oublié d'utiliser l'appli) ---------- */
   function openPastSession(draft) {
     const p = prof(); if (!p) return;
@@ -1550,17 +1613,6 @@
     } }, "Enregistrer la séance");
     const itemsBox = h("div");
     const upd = () => { save.textContent = draft.items.length ? "Enregistrer · " + plural(draft.items.length, "exercice") : "Enregistrer la séance"; };
-    // une série = poids et répétitions, chacun avec ses boutons − / + (le poids a aussi −5 / +5)
-    const stepper = (obj, key, label, step, opts) => {
-      const inp = h("input", { type: "number", inputmode: key === "w" ? "decimal" : "numeric", min: "0", step: key === "w" ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
-      inp.value = String(obj[key]);
-      const put = (v) => { obj[key] = key === "r" ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); };
-      inp.addEventListener("input", () => { const n = parseFloat(String(inp.value).replace(",", ".")); obj[key] = isFinite(n) && n >= 0 ? (key === "r" ? Math.round(n) : n) : 0; });
-      const btn = (txt, d, aria) => h("button", { type: "button", "aria-label": aria, onclick: () => put(obj[key] + d) }, txt);
-      const box = h("div", null, h("div", { class: "step" }, btn("−", -step, "Moins " + step + (key === "w" ? " kg" : " répétition") + " · " + label), inp, btn("+", step, "Plus " + step + (key === "w" ? " kg" : " répétition") + " · " + label)));
-      if (opts && opts.quick) box.append(h("div", { class: "quick" }, btn("−5", -5, "Moins 5 kg · " + label), btn("+5", 5, "Plus 5 kg · " + label)));
-      return box;
-    };
     const firstSet = (id) => { const ls = lastSessionSets(id); return ls ? startOf(ls) : { w: 0, r: 10 }; }; // la 1re série reprend le poids de départ de la dernière séance
     const paintItems = () => {
       itemsBox.replaceChildren();
@@ -1573,7 +1625,7 @@
         if (it.sets.length) card.append(h("div", { class: "pset-head" }, h("span"), h("span", { text: "POIDS (kg)" }), h("span", { text: "RÉPÉTITIONS" }), h("span")));
         it.sets.forEach((st, k) => {
           card.append(h("div", { class: "pset" }, h("span", { class: "pn", text: String(k + 1) }),
-            stepper(st, "w", "Poids série " + (k + 1) + " · " + it.name, 1, { quick: true }), stepper(st, "r", "Répétitions série " + (k + 1) + " · " + it.name, 1),
+            stepperEl(st, "w", "Poids série " + (k + 1) + " · " + it.name, 1, { quick: true }), stepperEl(st, "r", "Répétitions série " + (k + 1) + " · " + it.name, 1),
             h("button", { class: "ob", type: "button", "aria-label": "Retirer la série " + (k + 1) + " · " + it.name, onclick: () => { it.sets.splice(k, 1); paintItems(); } }, "✕")));
         });
         card.append(h("button", { class: "btn mini padd", type: "button", onclick: () => { const last = it.sets[it.sets.length - 1]; it.sets.push(last ? { w: last.w, r: last.r } : firstSet(it.id)); paintItems(); } }, "＋ Ajouter une série"));
@@ -2194,7 +2246,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "6 nov. 2026 · 21:07 · 72ea07"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "11 nov. 2026 · 22:32 · 54cc4a"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
