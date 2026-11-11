@@ -417,6 +417,64 @@
   .pset .ob { margin-top: 4px; }
   .padd { margin-top: 10px; width: 100%; }
   .hs-t { display: block; margin-top: 2px; font-size: .78rem; font-weight: 600; color: var(--muted); }
+  .ach .ach-lv { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+  .lvbadge { flex: 0 0 64px; height: 64px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 28%, #3a4a22, #161d10 70%); border: 2px solid var(--accent); box-shadow: 0 0 18px rgba(205,240,120,.28); line-height: 1; }
+  .lvbadge small { font-size: .56rem; letter-spacing: .14em; font-weight: 800; color: var(--accent); }
+  .lvbadge b { font-size: 1.55rem; font-weight: 900; color: #fff; }
+  .lv-t { flex: 1; min-width: 0; }
+  .lv-t b { display: block; font-size: 1.12rem; margin-bottom: 6px; }
+  .lv-t small { display: block; margin-top: 6px; color: var(--muted); font-size: .78rem; }
+  .ach-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .ach-st { padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 14px; background: rgba(255,255,255,.03); }
+  .ach-st small { display: block; font-size: .66rem; letter-spacing: .1em; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .ach-st b { display: block; margin-top: 4px; font-size: 1.15rem; }
+  .ach-next { margin-top: 14px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 16px; background: rgba(205,240,120,.05); }
+  .an-h, .an-f { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .an-h span { font-size: .72rem; letter-spacing: .1em; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .an-h b { font-size: 1.05rem; color: var(--accent); }
+  .ach-next .gb-track { display: block; margin: 8px 0; }
+  .an-f { flex-wrap: wrap; }
+  .an-f span { font-size: .82rem; color: var(--muted); white-space: nowrap; }
+  .an-f b { font-size: .85rem; }
+  .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .bcell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px 8px; border: 1px solid var(--line-2); border-radius: 16px; background: rgba(255,255,255,.03); color: inherit; font: inherit; cursor: pointer; text-align: center; }
+  .bcell b { font-size: .78rem; letter-spacing: .04em; margin-top: 4px; }
+  .bcell small { font-size: .68rem; color: var(--muted); }
+  .bcell small.got { color: var(--accent); font-weight: 700; }
+  .medal { display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
+  .medal.locked { filter: grayscale(1) brightness(.55) contrast(.9); opacity: .55; }
+  .bcell.locked b { color: var(--muted); }
+  .ach-how { margin-top: 14px; font-size: .85rem; color: var(--muted); }
+  .ach-how summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+  .ach-how ul { margin: 8px 0 0; padding-left: 18px; line-height: 1.55; }
+  .bsheet { text-align: center; padding: 6px 0 14px; }
+  .bpop { display: inline-block; animation: bpop .6s cubic-bezier(.2,1.4,.4,1) both; }
+  .bpop .medal { margin: 0 auto; }
+  .bname { margin-top: 10px; font-size: 1.5rem; font-weight: 900; letter-spacing: .06em; }
+  .bat { color: var(--accent); font-weight: 800; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; }
+  .bdesc { margin: 8px 0 4px; color: #cfd8e3; }
+  .bwhen { margin: 0; color: var(--muted); font-size: .85rem; }
+  .bwhen.lock { color: #f1c27a; }
+  .bfavor, .rw-favor { margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; background: rgba(205,240,120,.1); border: 1px solid rgba(205,240,120,.4); color: #e9f7c8; font-weight: 600; font-size: .9rem; line-height: 1.4; }
+  .bwhen.took { color: var(--accent); font-weight: 700; margin-top: 4px; }
+  .bcell small.took { color: #cfd8e3; font-weight: 600; }
+  .rw-bt .rw-took { color: var(--accent); font-weight: 700; font-size: .8rem; }
+  @keyframes bpop { 0% { transform: scale(.4) rotate(-12deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+  .reward { margin: 0 0 14px; padding: 14px; border: 1px solid var(--accent); border-radius: 18px; background: linear-gradient(160deg, rgba(205,240,120,.14), rgba(205,240,120,.03)); }
+  .rw-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .rw-k { font-size: .72rem; letter-spacing: .14em; font-weight: 800; color: var(--accent); }
+  .rw-gain { font-size: 1.9rem; font-weight: 900; color: #fff; animation: bpop .5s ease both; }
+  .rw-row { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid rgba(255,255,255,.07); font-size: .9rem; }
+  .rw-row b { color: var(--accent); }
+  .rw-up { margin-top: 8px; padding: 8px; text-align: center; border-radius: 12px; background: var(--accent); color: #11200a; font-weight: 900; letter-spacing: .06em; animation: bpop .5s ease both; }
+  .rw-lv { margin-top: 10px; font-size: .85rem; }
+  .rw-lv .gb-track { display: block; margin: 6px 0 4px; }
+  .rw-badge { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 12px; padding: 10px; border: 1px solid var(--accent); border-radius: 16px; background: rgba(0,0,0,.25); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .rw-bt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .rw-bt small { font-size: .62rem; letter-spacing: .14em; font-weight: 800; color: var(--accent); }
+  .rw-bt b { font-size: 1.15rem; letter-spacing: .05em; }
+  .rw-bt span { font-size: .82rem; color: #cfd8e3; }
+  .rw-next { margin: 10px 0 0; }
   .setsdone { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 16px; text-align: left; }
   .sd-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .sd-head b { font-size: 1rem; }
@@ -827,7 +885,7 @@
     scheduleSync(800); saveLocal(); paintAccount();
     return true;
   }
-  const normProfile = (p) => ({ id: p.id, name: String(p.name || "Profil"), avatar: typeof p.avatar === "string" ? p.avatar : null, notes: p.notes && typeof p.notes === "object" && !Array.isArray(p.notes) ? p.notes : {}, goal: Number.isInteger(p.goal) && p.goal >= 1 && p.goal <= 7 ? p.goal : null, custom: Array.isArray(p.custom) ? p.custom : [], photos: p.photos && typeof p.photos === "object" ? p.photos : {}, plan: Array.isArray(p.plan) ? p.plan : [], history: Array.isArray(p.history) ? p.history : [], sessions: Array.isArray(p.sessions) ? p.sessions.filter((x) => x && x.id && Array.isArray(x.ids)) : [] });
+  const normProfile = (p) => ({ id: p.id, name: String(p.name || "Profil"), avatar: typeof p.avatar === "string" ? p.avatar : null, notes: p.notes && typeof p.notes === "object" && !Array.isArray(p.notes) ? p.notes : {}, goal: Number.isInteger(p.goal) && p.goal >= 1 && p.goal <= 7 ? p.goal : null, custom: Array.isArray(p.custom) ? p.custom : [], photos: p.photos && typeof p.photos === "object" ? p.photos : {}, plan: Array.isArray(p.plan) ? p.plan : [], history: Array.isArray(p.history) ? p.history : [], sessions: Array.isArray(p.sessions) ? p.sessions.filter((x) => x && x.id && Array.isArray(x.ids)) : [], game: p.game && typeof p.game === "object" && !Array.isArray(p.game) ? p.game : null });
   D.profiles = D.profiles.filter((p) => p && p.id).map(normProfile);
   D.sync = D.sync && D.sync.profiles ? D.sync : { owner: null, profiles: {}, pt: {}, del: [] };
   D.sync.pt = D.sync.pt || {}; D.sync.del = D.sync.del || [];
@@ -1361,7 +1419,13 @@
     const vol = items.reduce((a, x) => a + x.vol, 0);
     const rec = { date: S.sessionStart, presence, ex, rest, other, sets: S.sets, vol, items, name: S.name || null };
     const p = D.profiles.find((x) => x.id === S.pid);
-    if (p) { p.history.push(rec); p.plan = []; saveData(); try { onSessionFinished(rec); } catch (e) {} }
+    if (p) {
+      const before = gameStats(p); p.history.push(rec); p.plan = [];
+      const res = settleGame(p), pa = res.st.parts.get(rec) || sessionParts(res.st.hist, rec, false);
+      markSeen(p, res.fresh);
+      pendingReward = { rec, st: res.st, parts: pa, gain: pa.total, fresh: res.fresh, levelUp: res.st.level > levelOf(before.points) };
+      saveData(); try { onSessionFinished(rec); } catch (e) {}
+    }
     stopTicker(); unlockScreen(); lsDel(SESSION_KEY);
     S = fresh();
     showSummary(rec);
@@ -1376,6 +1440,8 @@
       ["Temps non comptabilisé", r.other, "Transitions et autres moments", false]
     ];
     el.summaryList.replaceChildren();
+    if (pendingReward && pendingReward.rec === r) el.summaryList.append(rewardBlock(pendingReward));
+    pendingReward = null;
     rows.forEach(([label, ms, note, main]) => {
       el.summaryList.append(h("div", { class: "summary-row" + (main ? " main" : "") }, h("span", { text: label }), h("strong", { text: fmtLong(ms) }), h("small", { text: note })));
     });
@@ -1572,12 +1638,13 @@
   /* ---------- Poids / répétitions avec boutons − / + (le poids a aussi −5 / +5) ---------- */
   function stepperEl(obj, key, label, step, opts) {
     const after = (opts && opts.after) || (() => {});
-    const inp = h("input", { type: "number", inputmode: key === "w" ? "decimal" : "numeric", min: "0", step: key === "w" ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
+    const isW = key === "w", unit = (opts && opts.unit) || "répétition";
+    const inp = h("input", { type: "number", inputmode: isW ? "decimal" : "numeric", min: "0", step: isW ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
     inp.value = String(obj[key]);
-    const put = (v) => { obj[key] = key === "r" ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); after(); };
-    inp.addEventListener("input", () => { const n = parseFloat(String(inp.value).replace(",", ".")); obj[key] = isFinite(n) && n >= 0 ? (key === "r" ? Math.round(n) : n) : 0; after(); });
+    const put = (v) => { obj[key] = !isW ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); after(); };
+    inp.addEventListener("input", () => { const n = parseFloat(String(inp.value).replace(",", ".")); obj[key] = isFinite(n) && n >= 0 ? (!isW ? Math.round(n) : n) : 0; after(); });
     const btn = (txt, d, aria) => h("button", { type: "button", "aria-label": aria, onclick: () => put(obj[key] + d) }, txt);
-    const box = h("div", null, h("div", { class: "step" }, btn("−", -step, "Moins " + step + (key === "w" ? " kg" : " répétition") + " · " + label), inp, btn("+", step, "Plus " + step + (key === "w" ? " kg" : " répétition") + " · " + label)));
+    const box = h("div", null, h("div", { class: "step" }, btn("−", -step, "Moins " + step + (isW ? " kg" : " " + unit) + " · " + label), inp, btn("+", step, "Plus " + step + (isW ? " kg" : " " + unit) + " · " + label)));
     if (opts && opts.quick) box.append(h("div", { class: "quick" }, btn("−5", -5, "Moins 5 kg · " + label), btn("+5", 5, "Plus 5 kg · " + label)));
     return box;
   }
@@ -1609,7 +1676,9 @@
       }
       const nm = (draft.name || "").trim().replace(/\s+/g, " ");
       const rec = { date: start, presence: end - start, ex: 0, rest: 0, other: end - start, sets: items.reduce((a, x) => a + x.sets, 0), vol: items.reduce((a, x) => a + x.vol, 0), items, name: nm || null, manual: true };
-      p.history.push(rec); p.history.sort((a, b) => a.date - b.date); saveData(); renderGoalBar(); toast("Séance ajoutée à l’historique"); closeSheet();
+      p.history.push(rec); p.history.sort((a, b) => a.date - b.date);
+      const res = settleGame(p), pa = res.st.parts.get(rec); saveData(); renderGoalBar(); closeSheet();
+      if (res.fresh.length) openCelebration(res.fresh); else toast("Séance ajoutée · +" + (pa ? pa.total : 0) + " pts");
     } }, "Enregistrer la séance");
     const itemsBox = h("div");
     const upd = () => { save.textContent = draft.items.length ? "Enregistrer · " + plural(draft.items.length, "exercice") : "Enregistrer la séance"; };
@@ -1849,6 +1918,8 @@
     root.append(profileHero());
     root.append(accountCard());
     root.append(pushCard());
+    root.append(achievementsCard(p));
+    celebFlush();
 
     // Profils
     const sec = h("section", { class: "card" }, h("h3", { text: "Profils" }), h("p", { class: "muted small", style: "margin:-4px 0 4px", text: "Touchez la photo d’un profil pour changer son avatar." }));
@@ -2153,6 +2224,197 @@
     while ((counts.get(w) || 0) >= goal) { streak++; w = shiftWeek(w, -1); }
     return { goal, done, streak, counts, cur };
   }
+  /* ============ FH PULSE ACHIEVEMENTS : points, niveaux et badges ============
+     Tout est DÉDUIT de l'historique des séances (source de vérité) : aucun total saisi à la main, aucun doublon possible.
+     Seules les dates d'obtention des badges et le record de points sont mémorisés (profil.game), pour qu'un badge acquis ne disparaisse jamais. */
+  /* GAME-PURE-BEGIN */
+  // Un badge tous les 12 séances (≈ 1 mois d'entraînement à 3 séances par semaine) : 12 badges = 144 séances = 1 an
+  const BADGES = [
+    { code: "INITIE", name: "INITIÉ", at: 12, tier: 1, desc: "Le premier mois est accompli." },
+    { code: "ASSIDU", name: "ASSIDU", at: 24, tier: 2, desc: "Deux mois de rendez-vous tenus." },
+    { code: "DISCIPLINE", name: "DISCIPLINÉ", at: 36, tier: 3, desc: "Trois mois : la régularité devient une habitude." },
+    { code: "DETERMINE", name: "DÉTERMINÉ", at: 48, tier: 4, desc: "Quatre mois : rien ne t’arrête." },
+    { code: "GUERRIER", name: "GUERRIER", at: 60, tier: 5, desc: "Cinq mois : la persévérance est confirmée." },
+    { code: "COMBATTANT", name: "COMBATTANT", at: 72, tier: 6, desc: "Six mois d’efforts : la moitié de l’année." },
+    { code: "ATHLETE", name: "ATHLÈTE", at: 84, tier: 7, desc: "Sept mois : la constance s’inscrit dans la durée." },
+    { code: "CHAMPION", name: "CHAMPION", at: 96, tier: 8, desc: "Huit mois : tu joues dans la cour des grands." },
+    { code: "ELITE", name: "ÉLITE", at: 108, tier: 9, desc: "Neuf mois : un engagement remarquable." },
+    { code: "MAITRE", name: "MAÎTRE", at: 120, tier: 10, desc: "Dix mois de maîtrise." },
+    { code: "LEGENDE", name: "LÉGENDE", at: 132, tier: 11, desc: "Onze mois : une détermination exceptionnelle." },
+    { code: "IMMORTEL", name: "IMMORTEL", at: 144, tier: 12, desc: "Un an d’entraînement : le niveau ultime." }
+  ];
+  const FAVOR = "🎁 Tu peux maintenant demander au coach n’importe quelle faveur : une gourmandise ou autre !";   // à chaque badge obtenu
+  const badgeSpan = (at) => (at % 144 === 0 ? (at === 144 ? "1 an" : at / 144 + " ans") : at % 12 === 0 ? at / 12 + " mois" : "");   // équivalent en durée (12 séances ≈ 1 mois)
+  const PTS = { session: 20, set: 2, setCap: 40, record: 15, week: 50 };      // points : séance, par série (40 max), par record ★, objectif de la semaine
+  const levelAt = (n) => 50 * n * (n - 1);                                     // points cumulés pour ATTEINDRE le niveau n : 0, 100, 300, 600, 1000…
+  const levelOf = (pts) => { let n = 1; while (levelAt(n + 1) <= pts) n++; return n; };
+  const nextBadge = (n, have) => BADGES.find((b) => n < b.at && !(have && have[b.code])) || null;   // le prochain badge PAS encore acquis
+  const badgeProgress = (n, have) => { const nb = nextBadge(n, have); return nb ? { next: nb, left: nb.at - n, pct: Math.min(100, Math.round((1000 * n) / nb.at) / 10) } : null; }; // progression globale vers le prochain seuil : 127 / 200 = 63,5 %
+  // Durée écrite : moins de 7 jours → en jours ; moins d'un mois → en semaines (par demi-semaine) ; un mois ou plus → en mois et jours
+  const DAY_MS = 86400000;
+  const dayStart = (ts) => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const addMonths = (d, n) => { const y = d.getFullYear(), m = d.getMonth() + n, last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d.getDate(), last)); };
+  function durationText(from, to) {
+    const a = new Date(Math.min(from, to)), b = new Date(Math.max(from, to));
+    let months = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+    while (months > 0 && dayStart(addMonths(a, months)) > dayStart(b)) months--;
+    if (months >= 1) { const rest = Math.round((dayStart(b) - dayStart(addMonths(a, months))) / DAY_MS); return months + " mois" + (rest > 0 ? " et " + rest + " jour" + (rest > 1 ? "s" : "") : ""); }
+    const days = Math.round((dayStart(b) - dayStart(a)) / DAY_MS);
+    if (days < 1) return "moins d’un jour";
+    if (days < 7) return days + " jour" + (days > 1 ? "s" : "");
+    const w2 = Math.round(days / 3.5), w = Math.floor(w2 / 2);                      // demi-semaines
+    return w + " semaine" + (w > 1 ? "s" : "") + (w2 % 2 === 1 ? " et demie" : "");
+  }
+  /* GAME-PURE-END */
+  const gameOf = (p) => {
+    const g = p.game && typeof p.game === "object" && !Array.isArray(p.game) ? p.game : (p.game = {});
+    if (!g.badges || typeof g.badges !== "object" || Array.isArray(g.badges)) g.badges = {};
+    if (!Number.isFinite(g.peak)) g.peak = 0; if (!Array.isArray(g.seen)) g.seen = [];
+    if (g.first != null && !Number.isFinite(g.first)) delete g.first;
+    return g;
+  };
+  function sessionParts(hist, r, weekDone) {
+    const logged = (r.items || []).reduce((a, it) => a + ((it.log || []).length), 0);
+    const sets = Math.min(PTS.setCap, Math.max(Number.isFinite(r.sets) ? r.sets : 0, logged));
+    const nRec = recordIds(hist, r).size;
+    const parts = { session: PTS.session, sets: sets * PTS.set, records: nRec * PTS.record, week: weekDone ? PTS.week : 0, nSets: sets, nRec };
+    parts.total = parts.session + parts.sets + parts.records + parts.week; return parts;
+  }
+  function gameStats(p) {
+    const hist = p.history.slice().sort((a, b) => a.date - b.date), goal = goalOf(p), perWeek = new Map(), parts = new Map(); let pts = 0;
+    hist.forEach((r) => { const wk = weekStartOf(r.date), k = (perWeek.get(wk) || 0) + 1; perWeek.set(wk, k); const pa = sessionParts(hist, r, k === goal); parts.set(r, pa); pts += pa.total; });
+    const g = gameOf(p), n = hist.length, points = Math.max(pts, g.peak || 0), level = levelOf(points);
+    const unlocked = BADGES.filter((b) => g.badges[b.code]);
+    return { sessions: n, points, level, from: levelAt(level), to: levelAt(level + 1), unlocked, highest: unlocked[unlocked.length - 1] || null, prog: badgeProgress(n, g.badges), parts, hist };
+  }
+  // attribue les badges dont le seuil est atteint (date d'obtention = date de la séance qui l'a atteint) ; sans doublon, relançable à volonté
+  function settleGame(p) {
+    const g = gameOf(p), hist = p.history.slice().sort((a, b) => a.date - b.date), fresh = [];
+    BADGES.forEach((b) => { if (hist.length >= b.at && !g.badges[b.code]) { g.badges[b.code] = hist[b.at - 1].date; fresh.push(b); } });
+    if (g.badges.INITIE && !Number.isFinite(g.first) && hist.length) g.first = hist[0].date;   // point de départ du 1er badge, gardé même si l'historique change
+    const st = gameStats(p); if (st.points > g.peak) g.peak = st.points;
+    return { fresh, st };
+  }
+  // temps mis pour obtenir un badge : depuis le badge précédent (ou depuis la 1re séance pour INITIÉ)
+  function badgeTook(p, b) {
+    const g = gameOf(p), got = g.badges[b.code]; if (!got) return null; const i = BADGES.indexOf(b); let from, since;
+    if (i === 0) { const hs = p.history.slice().sort((x, y) => x.date - y.date); from = Number.isFinite(g.first) ? g.first : hs[0] && hs[0].date; since = "depuis ta première séance"; }
+    else { from = g.badges[BADGES[i - 1].code]; since = "depuis " + BADGES[i - 1].name; }
+    return Number.isFinite(from) ? { text: durationText(from, got), since } : null;
+  }
+  let pendingReward = null;
+  const fmtInt = (n) => Number(n).toLocaleString("fr-FR");
+  const fmtPct = (x) => String(x).replace(".", ",") + " %";
+
+  /* Médailles : même silhouette, matières qui évoluent (bronze, argent, or, noir et or, platine, diamant, rouge et or) */
+  const MEDAL = [
+    { hi: "#f4c99a", lo: "#7a4a1d", f1: "#d98f4e", f2: "#8a5224", em: "#fff0dc", rib: "#d2692b" },   //  1 bronze
+    { hi: "#ffffff", lo: "#6f7c88", f1: "#eef2f5", f2: "#9aa6b1", em: "#ffffff", rib: "#7f96b2" },   //  2 argent
+    { hi: "#fff3b0", lo: "#946a10", f1: "#ffd84d", f2: "#c28a12", em: "#fffbe0", rib: "#e0483c" },   //  3 or
+    { hi: "#b8ffd0", lo: "#0f6b3a", f1: "#3ddc84", f2: "#12823f", em: "#f0fff6", rib: "#17a05a" },   //  4 émeraude
+    { hi: "#bcd6ff", lo: "#1a3f8f", f1: "#4d86f0", f2: "#1c459e", em: "#eef4ff", rib: "#2f63cf" },   //  5 saphir
+    { hi: "#e6c8ff", lo: "#5a2a8a", f1: "#a566e6", f2: "#5e2d94", em: "#f8eeff", rib: "#7d3fc2" },   //  6 améthyste
+    { hi: "#ffc0c8", lo: "#7d0f22", f1: "#e0364f", f2: "#8a1428", em: "#fff0f2", rib: "#c42a42" },   //  7 rubis
+    { hi: "#ffe28a", lo: "#7a5a14", f1: "#2b2d35", f2: "#0b0c0f", em: "#ffd86b", rib: "#c9982a" },   //  8 noir et or
+    { hi: "#ffffff", lo: "#6d7f95", f1: "#e3effa", f2: "#8fa9c4", em: "#ffffff", rib: "#7392b8" },   //  9 platine
+    { hi: "#eafdff", lo: "#1e86a8", f1: "#a8f0ff", f2: "#2aa8d0", em: "#ffffff", rib: "#2fa8cf" },   // 10 diamant
+    { hi: "#ffe28a", lo: "#8a1020", f1: "#cf1c30", f2: "#6d0b17", em: "#ffd86b", rib: "#cf2a3c" },   // 11 rouge et or
+    { hi: "#e9ff9a", lo: "#3f6b00", f1: "#16210a", f2: "#050802", em: "#b6ff2a", rib: "#8de02a" }    // 12 noir et vert néon (FH Pulse)
+  ];
+  let medalSeq = 0;
+  function medalEl(b, locked, w) {
+    const m = MEDAL[b.tier - 1], id = "md" + (++medalSeq), W = w || 84;
+    const svg = svgEl("svg", { viewBox: "0 -16 100 140", class: "medal" + (locked ? " locked" : ""), role: "img", "aria-label": "Badge " + b.name + (locked ? " (verrouillé)" : ""), width: W, height: Math.round(W * 1.4) });
+    const defs = svgEl("defs"); const lg = (gid, a, c, x2, y2) => { const g = svgEl("linearGradient", { id: id + gid, x1: 0, y1: 0, x2: x2, y2: y2 }); g.append(svgEl("stop", { offset: "0", "stop-color": a }), svgEl("stop", { offset: "1", "stop-color": c })); return g; };
+    const rg = svgEl("radialGradient", { id: id + "f", cx: "38%", cy: "30%", r: "80%" }); rg.append(svgEl("stop", { offset: "0", "stop-color": m.f1 }), svgEl("stop", { offset: "1", "stop-color": m.f2 }));
+    defs.append(lg("r", m.hi, m.lo, 1, 1), lg("b", m.rib, m.lo, 0, 1), rg); svg.append(defs);
+    if (b.tier >= 8) { const nr = b.tier === 12 ? 20 : b.tier >= 11 ? 16 : 12; for (let i = 0; i < nr; i++) { const a = (i * 360) / nr; svg.append(svgEl("polygon", { points: "50,46 47,-4 53,-4", fill: m.em, opacity: b.tier === 12 ? ".4" : ".28", transform: "rotate(" + a + " 50 46)" })); } }   // rayons à partir du niveau 8
+    if (b.tier >= 10) svg.append(svgEl("polygon", { points: "33,6 35,-8 43,-1 50,-13 57,-1 65,-8 67,6", fill: "url(#" + id + "r)", stroke: m.lo, "stroke-width": 1 }), svgEl("circle", { cx: 50, cy: -9, r: 2.3, fill: m.em }), svgEl("circle", { cx: 35, cy: -5, r: 1.7, fill: m.em }), svgEl("circle", { cx: 65, cy: -5, r: 1.7, fill: m.em }));   // couronne à partir du niveau 10
+    svg.append(svgEl("polygon", { points: "31,74 20,120 36,110 47,122 53,78", fill: "url(#" + id + "b)" }), svgEl("polygon", { points: "69,74 80,120 64,110 53,122 47,78", fill: "url(#" + id + "b)" }));
+    svg.append(svgEl("circle", { cx: 50, cy: 46, r: 42, fill: "url(#" + id + "r)" }));
+    if (b.tier >= 5) svg.append(svgEl("circle", { cx: 50, cy: 46, r: 38.6, fill: "none", stroke: m.hi, "stroke-width": 2.6, "stroke-dasharray": "1.6 3.4", opacity: ".85" }));
+    if (b.tier === 12) svg.append(svgEl("circle", { cx: 50, cy: 46, r: 44.5, fill: "none", stroke: m.em, "stroke-width": 1.6, opacity: ".9" }));
+    svg.append(svgEl("circle", { cx: 50, cy: 46, r: 34, fill: m.lo }), svgEl("circle", { cx: 50, cy: 46, r: 31.5, fill: "url(#" + id + "f)" }));
+    if (b.tier >= 2) for (let i = 0; i < 7; i++) for (const side of [-1, 1]) {
+      const a = (112 + i * 21) * Math.PI / 180, x = 50 + side * 25.5 * Math.cos(a), y = 46 + 25.5 * Math.sin(a);
+      svg.append(svgEl("ellipse", { cx: x.toFixed(1), cy: y.toFixed(1), rx: 2.1, ry: 4.4, fill: m.em, opacity: ".78", transform: "rotate(" + (side * (112 + i * 21 - 90) + 0) + " " + x.toFixed(1) + " " + y.toFixed(1) + ")" }));
+    }
+    svg.append(svgEl("text", { x: 50, y: 53, "text-anchor": "middle", "font-size": 24, "font-weight": 900, "font-style": "italic", "font-family": "system-ui,Helvetica,Arial,sans-serif", fill: m.em, stroke: m.lo, "stroke-width": 0.8, "paint-order": "stroke" }, "FH"));
+    svg.append(svgEl("polyline", { points: "31,60 41,60 45,53 49,67 54,56 57,60 69,60", fill: "none", stroke: m.em, "stroke-width": 1.7, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: ".95" }));
+    svg.append(svgEl("rect", { x: 30, y: 77, width: 40, height: 17, rx: 8.5, fill: "#0e1118", stroke: m.hi, "stroke-width": 1.4 }), svgEl("text", { x: 50, y: 89.6, "text-anchor": "middle", "font-size": 12.5, "font-weight": 800, "font-family": "system-ui,Helvetica,Arial,sans-serif", fill: m.em }, String(b.at)));
+    svg.append(svgEl("ellipse", { cx: 36, cy: 26, rx: 17, ry: 9, fill: "#fff", opacity: ".22", transform: "rotate(-28 36 26)" }));
+    return svg;
+  }
+  const dateFr = (ts) => new Date(ts).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+  function badgeCard(b, g, st) {
+    const got = g.badges[b.code]; const pr = prof(); const took = (x) => (pr ? badgeTook(pr, x) : null);
+    return h("div", { class: "bsheet" }, h("div", { class: "bpop" }, medalEl(b, !got, 150)), h("div", { class: "bname", text: b.name }), h("div", { class: "bat", text: fmtInt(b.at) + " séances" + (badgeSpan(b.at) ? " · " + badgeSpan(b.at) : "") }), h("p", { class: "bdesc", text: b.desc }),
+      got ? h("div", null, h("p", { class: "bwhen", text: "Obtenu le " + dateFr(got) }), took(b) ? h("p", { class: "bwhen took", text: "En " + took(b).text + " " + took(b).since }) : null, h("p", { class: "bfavor", text: FAVOR })) : h("p", { class: "bwhen lock", text: "Encore " + plural(Math.max(0, b.at - st.sessions), "séance") + " pour le débloquer" }));
+  }
+  function openBadgeSheet(list, detail) {
+    const p = prof(); const g = p ? gameOf(p) : { badges: {} }; const st = p ? gameStats(p) : { sessions: 0 };
+    openSheet(detail ? "Badge" : list.length > 1 ? "Nouveaux badges !" : "Nouveau badge !", [h("div", { class: "stack" }, ...list.map((b) => badgeCard(b, g, st)))], h("button", { class: "btn primary block", type: "button", onclick: closeSheet }, detail ? "Fermer" : "Super !"));
+  }
+  // bloc « Récompenses » du bilan de fin de séance
+  function rewardBlock(rw) {
+    const st = rw.st, pa = rw.parts; const wrap = h("div", { class: "reward" });
+    wrap.append(h("div", { class: "rw-head" }, h("span", { class: "rw-k", text: "RÉCOMPENSES" }), h("b", { class: "rw-gain", text: "+" + fmtInt(rw.gain) + " pts" })));
+    const rows = [["Séance terminée", PTS.session]]; if (pa.nSets) rows.push([plural(pa.nSets, "série") + " enregistrée" + (pa.nSets > 1 ? "s" : ""), pa.sets]); if (pa.nRec) rows.push([pa.nRec > 1 ? pa.nRec + " records ★" : "Nouveau record ★", pa.records]); if (pa.week) rows.push(["Objectif de la semaine atteint", pa.week]);
+    rows.forEach(([t, v]) => wrap.append(h("div", { class: "rw-row" }, h("span", { text: t }), h("b", { text: "+" + v }))));
+    if (rw.levelUp) wrap.append(h("div", { class: "rw-up", text: "★ NIVEAU " + st.level + " ATTEINT !" }));
+    const span = st.to - st.from, pct = Math.max(0, Math.min(100, Math.round((100 * (st.points - st.from)) / span)));
+    wrap.append(h("div", { class: "rw-lv" }, h("span", { text: "Niveau " + st.level + " · " + fmtInt(st.points) + " pts" }), h("span", { class: "gb-track" }, h("span", { class: "gb-fill", style: "width:" + pct + "%" })), h("small", { class: "muted", text: fmtInt(st.to - st.points) + " pts avant le niveau " + (st.level + 1) })));
+    rw.fresh.forEach((b) => wrap.append(h("button", { class: "rw-badge", type: "button", onclick: () => openBadgeSheet([b]) }, h("span", { class: "bpop" }, medalEl(b, false, 64)), h("span", { class: "rw-bt" }, h("small", { text: "NOUVEAU BADGE" }), h("b", { text: b.name }), h("span", { text: b.desc }), (() => { const pr = prof(), tk = pr ? badgeTook(pr, b) : null; return tk ? h("span", { class: "rw-took", text: "Obtenu en " + tk.text + " " + tk.since }) : null; })()))));
+    if (rw.fresh.length) wrap.append(h("p", { class: "rw-favor", text: FAVOR }));
+    if (!rw.fresh.length && st.prog) wrap.append(h("p", { class: "rw-next muted small", text: "Prochain badge : " + st.prog.next.name + " · encore " + plural(st.prog.left, "séance") }));
+    return wrap;
+  }
+  // rubrique « Mes récompenses » du profil
+  function achievementsCard(p) {
+    const res = settleGame(p), st = res.st; const g = gameOf(p);
+    if (res.fresh.length) saveData();
+    const unseenB = BADGES.filter((b) => g.badges[b.code] && g.seen.indexOf(b.code) < 0);   // badges mérités (y compris par l'historique) et pas encore fêtés
+    if (unseenB.length) celebAdd(p.id, unseenB);
+    const card = h("section", { class: "card ach" }, h("h3", { text: "Niveau et badges" }));
+    const span = st.to - st.from, pct = Math.max(0, Math.min(100, Math.round((100 * (st.points - st.from)) / span)));
+    card.append(h("div", { class: "ach-lv" }, h("div", { class: "lvbadge", "aria-label": "Niveau " + st.level }, h("small", { text: "NIV." }), h("b", { text: String(st.level) })),
+      h("div", { class: "lv-t" }, h("b", { text: fmtInt(st.points) + " points" }), h("span", { class: "gb-track" }, h("span", { class: "gb-fill", style: "width:" + pct + "%" })), h("small", { text: fmtInt(st.to - st.points) + " pts avant le niveau " + (st.level + 1) }))));
+    const stat = (k, v) => h("div", { class: "ach-st" }, h("small", { text: k }), h("b", { text: v }));
+    card.append(h("div", { class: "ach-stats" }, stat("Séances validées", fmtInt(st.sessions)), stat("Badge actuel", st.highest ? st.highest.name : "Aucun")));
+    if (st.prog) { const nb = st.prog.next;
+      card.append(h("div", { class: "ach-next" }, h("div", { class: "an-h" }, h("span", { text: "Prochain badge" }), h("b", { text: nb.name })), h("span", { class: "gb-track" }, h("span", { class: "gb-fill", style: "width:" + st.prog.pct + "%" })),
+        h("div", { class: "an-f" }, h("span", { text: fmtInt(st.sessions) + " / " + fmtInt(nb.at) + " · " + fmtPct(st.prog.pct) }), h("b", { text: plural(st.prog.left, "séance") + " restante" + (st.prog.left > 1 ? "s" : "") }))));
+    } else card.append(h("div", { class: "ach-next" }, h("b", { text: "Collection complète : tu es IMMORTEL." })));
+    const grid = h("div", { class: "ach-grid" });
+    BADGES.forEach((b) => { const got = g.badges[b.code];
+      grid.append(h("button", { class: "bcell" + (got ? "" : " locked"), type: "button", "aria-label": b.name + " · " + b.at + " séances · " + (got ? "obtenu le " + dateFr(got) + (badgeTook(p, b) ? ", en " + badgeTook(p, b).text : "") : "verrouillé"), onclick: () => openBadgeSheet([b], true) },
+        medalEl(b, !got, 76), h("b", { text: b.name }), h("small", { text: b.at + " séances" }), h("small", { class: got ? "got" : "lk", text: got ? dateFr(got) : "Verrouillé" }), got && badgeTook(p, b) ? h("small", { class: "took", text: "en " + badgeTook(p, b).text }) : null));
+    });
+    card.append(h("p", { class: "muted small", style: "margin:14px 2px 0", text: "Un badge tous les 12 séances, soit environ 1 mois à 3 séances par semaine : 12 badges, c’est 1 an d’entraînement." }), grid);
+    card.append(h("details", { class: "ach-how" }, h("summary", { text: "Comment gagner des points ?" }),
+      h("ul", null, h("li", { text: "+" + PTS.session + " points par séance terminée" }), h("li", { text: "+" + PTS.set + " points par série enregistrée (jusqu’à " + PTS.setCap + " séries par séance)" }), h("li", { text: "+" + PTS.record + " points par record ★ battu" }), h("li", { text: "+" + PTS.week + " points quand tu atteins ton objectif de la semaine" }), h("li", { text: "Un niveau tous les 100, 200, 300… points de plus : plus tu progresses, plus il faut de points." }), h("li", { text: "Chaque badge obtenu te donne le droit de demander au coach n’importe quelle faveur : une gourmandise ou autre." }))));
+    return card;
+  }
+  /* ---------- Fêtes des badges ---------- */
+  // file des fêtes : propre à UN profil (si on change de profil, on repart de zéro) ; ce qui a déjà été fêté (profil.game.seen) n'est jamais refêté
+  const celeb = { pid: null, badges: [], timer: null };
+  function celebAdd(pid, list) {
+    if (celeb.pid !== pid) { celeb.pid = pid; celeb.badges = []; }
+    list.forEach((x) => { if (!celeb.badges.some((y) => y.code === x.code)) celeb.badges.push(x); });
+  }
+  function celebFlush() {
+    if (celeb.timer || !celeb.badges.length) return;
+    celeb.timer = setTimeout(() => {
+      celeb.timer = null; const pid = celeb.pid, b = celeb.badges; celeb.badges = [];
+      const cur = prof(); if (cur && cur.id === pid && b.length) openCelebration(b);   // on ne fête que le profil affiché
+    }, 350);
+  }
+  function markSeen(p, badges) { const g = gameOf(p); badges.forEach((b) => { if (g.seen.indexOf(b.code) < 0) g.seen.push(b.code); }); }
+  function openCelebration(badges) {
+    const p = prof(); if (!p) return; const g = gameOf(p), st = gameStats(p);
+    openSheet(badges.length > 1 ? "Nouveaux badges !" : "Nouveau badge !", [h("div", { class: "stack" }, ...badges.map((b) => badgeCard(b, g, st)))], h("button", { class: "btn primary block", type: "button", onclick: closeSheet }, "Super !"));
+    markSeen(p, badges); saveData();
+  }
   function goalRing(done, goal) {
     const R = 34, C = 2 * Math.PI * R, f = Math.min(1, done / goal);
     const svg = svgEl("svg", { viewBox: "0 0 90 90", class: "ring", role: "img", "aria-label": done + " séances sur " + goal });
@@ -2179,6 +2441,7 @@
     if (bar.hidden) return;
     const st = weekStats(p);
     bar.append(h("span", { class: "gb-t", text: "Cette semaine" }), h("b", { text: st.done + " / " + st.goal + " séances" + (st.streak ? " · ★ " + st.streak : "") }), h("span", { class: "gb-track" }, h("span", { class: "gb-fill", style: "width:" + Math.min(100, Math.round((100 * st.done) / st.goal)) + "%" })));
+
   }
   function calendarCard(hist, st) {
     const now = new Date(); if (st.month == null) st.month = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -2246,7 +2509,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "11 nov. 2026 · 22:32 · 54cc4a"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "12 nov. 2026 · 00:14 · 408ad0"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2268,7 +2531,7 @@
     if (!who || !boot.ready) return; // pendant le chargement, on n'écrase pas la copie existante
     try {
       localOk = lsSet(LOCAL_KEY, JSON.stringify({ v: 2, owner: who.key, at: Date.now(), current: D.current, sync: { profiles: D.sync.profiles, del: D.sync.del },
-        profiles: D.profiles.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history })),
+        profiles: D.profiles.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history })),
         live: S && S.sessionStart ? S : null })) !== false;
     } catch (e) { localOk = false; }
   }
@@ -2413,21 +2676,29 @@
   }
 
   /* ---------- Contenu synchronisé d’un profil ---------- */
-  const contentOf = (p) => JSON.stringify({ name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
-  const dataOf = (p) => ({ avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
+  const contentOf = (p) => JSON.stringify({ name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
+  const dataOf = (p) => ({ avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
+  // badges : on garde la date d'obtention la plus ancienne ; le record de points, le plus haut ; jamais de retrait
+  function mergeGame(a, b) {
+    const ok = (x) => (x && typeof x === "object" && !Array.isArray(x) ? x : {}); a = ok(a); b = ok(b); const badges = {};
+    [ok(a.badges), ok(b.badges)].forEach((src) => Object.keys(src).forEach((k) => { const v = src[k]; if (Number.isFinite(v) && (!(k in badges) || v < badges[k])) badges[k] = v; }));
+    const seen = []; [].concat(Array.isArray(a.seen) ? a.seen : [], Array.isArray(b.seen) ? b.seen : []).forEach((c) => { if (typeof c === "string" && seen.indexOf(c) < 0) seen.push(c); });
+    const out = { badges, peak: Math.max(Number(a.peak) || 0, Number(b.peak) || 0), seen }; const f = [a.first, b.first].filter((x) => Number.isFinite(x)); if (f.length) out.first = Math.min(...f); return out;
+  }
   function mergeInto(p, sr) {
     const d = sr.data || {};
     const union = (a, b, key) => { const m = new Map(); (a || []).concat(b || []).forEach((x) => { if (x && x[key] != null && !m.has(x[key])) m.set(x[key], x); }); return [...m.values()]; };
     p.avatar = p.avatar || (typeof d.avatar === "string" ? d.avatar : null);
     p.notes = Object.assign({}, d.notes && typeof d.notes === "object" ? d.notes : {}, p.notes || {}); // en cas de conflit, la note écrite ici l'emporte
     p.goal = p.goal || (Number.isInteger(d.goal) ? d.goal : null);
+    p.game = mergeGame(p.game, d.game);
     p.custom = union(p.custom, d.custom, "id");
     p.sessions = union(p.sessions, d.sessions, "id");
     p.history = union(p.history, d.history, "date").sort((x, y) => x.date - y.date);
   }
   function applyServer(p, sr) {
     const d = sr.data || {};
-    p.name = sr.name || p.name; p.avatar = typeof d.avatar === "string" ? d.avatar : null; p.notes = d.notes && typeof d.notes === "object" && !Array.isArray(d.notes) ? d.notes : {}; p.goal = Number.isInteger(d.goal) ? d.goal : null; p.custom = d.custom || []; p.sessions = d.sessions || []; p.history = d.history || [];
+    p.name = sr.name || p.name; p.avatar = typeof d.avatar === "string" ? d.avatar : null; p.notes = d.notes && typeof d.notes === "object" && !Array.isArray(d.notes) ? d.notes : {}; p.goal = Number.isInteger(d.goal) ? d.goal : null; p.game = d.game && typeof d.game === "object" && !Array.isArray(d.game) ? d.game : null; p.custom = d.custom || []; p.sessions = d.sessions || []; p.history = d.history || [];
     if (!(sessionActive() && S.pid === p.id)) p.plan = d.plan || [];
     restoreLive(p, d.live);
   }
