@@ -280,6 +280,23 @@
   .hb2 { display: grid; gap: 8px; font-size: .92rem; }
   .hb2 b { font-variant-numeric: tabular-nums; }
   .chart { margin: 8px 0 4px; }
+.ch-t { margin: 12px 0 0; font-size: .85rem; font-weight: 700; color: var(--text); }
+.opt3 { display: flex; gap: 6px; } .opt3 button { flex: 1; padding: 10px 6px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--surface); color: var(--muted); font: inherit; font-size: .85rem; font-weight: 700; } .opt3 button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.wk-kcal { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: -2px 2px 8px; padding: 9px 12px; border-radius: 14px; background: rgba(205,240,120,.08); border: 1px solid rgba(205,240,120,.28); font-size: .85rem; color: var(--muted); } .wk-kcal b { color: var(--accent); font-size: .92rem; }
+.summary-row.kcal strong { color: var(--accent); }
+.chartbox { position: relative; padding-top: 88px; }
+.chartbox > svg { user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.ctip { position: absolute; top: 0; left: 0; z-index: 2; display: grid; gap: 1px; min-width: 128px; width: max-content; max-width: min(300px, 100%); box-sizing: border-box; padding: 6px 11px 7px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); box-shadow: 0 6px 18px rgba(0,0,0,.35); pointer-events: auto; }
+.ctip[hidden] { display: none; }
+.ct-r1 { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 9px; }
+.ct-v { font-size: 1.3rem; font-weight: 800; line-height: 1.15; color: #fff; }
+.ct-d { font-size: .8rem; color: var(--muted); }
+.ct-x { font-size: .76rem; color: var(--muted); }
+.ct-o { justify-self: start; padding: 2px 0 0; font-size: .8rem; }
+.ct-hint { margin: 4px 2px 0; font-size: .74rem; color: var(--dim); }
+.chartbox:has(.ctip:not([hidden])) .ct-hint { display: none; }
+.exb.flash { animation: exFlash 1.7s ease; }
+@keyframes exFlash { 0%, 55% { background: rgba(205,240,120,.16); box-shadow: 0 0 0 6px rgba(205,240,120,.16); } 100% { background: transparent; box-shadow: 0 0 0 6px rgba(205,240,120,0); } }
   .cap { font-size: .8rem; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
   .cap b { color: var(--accent); }
   .thumb { width: 46px; height: 46px; border-radius: 12px; overflow: hidden; position: relative; flex: none; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; background: linear-gradient(150deg, hsl(var(--h) 36% 28%), hsl(var(--h) 40% 15%)); }
@@ -306,7 +323,8 @@
   .cmp-name .thumb { width: 44px; height: 44px; }
   .cmp-name span { min-width: 0; }
   .hist summary { flex-wrap: wrap; }
-  .minis { flex: 0 0 100%; box-sizing: border-box; padding-left: 22px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+  details.hist summary > span.hs-m { flex: 0 0 100%; box-sizing: border-box; padding-left: 22px; margin-top: -2px; font-size: .86rem; }
+.minis { flex: 0 0 100%; box-sizing: border-box; padding-left: 22px; display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
   .minis .thumb { width: 30px; height: 30px; border-radius: 8px; }
   .minis .more { font-size: .72rem; color: var(--muted); font-weight: 700; margin-left: 2px; }
   .cmp-row { display: grid; grid-template-columns: 22px 1fr 1fr 84px; gap: 8px; align-items: baseline; padding: 5px 0; font-size: .82rem; font-variant-numeric: tabular-nums; }
@@ -561,7 +579,7 @@
   .cal-d.has { color: var(--text); font-weight: 700; background: rgba(205,240,120,.1); }
   .cal-d.has.sel { background: rgba(205,240,120,.2); border-color: rgba(205,240,120,.5); }
   .cal-d .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); position: absolute; bottom: 5px; }
-  select.field { appearance: none; -webkit-appearance: none; }
+  select.field { appearance: none; -webkit-appearance: none; padding-right: 44px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cdf078' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; background-size: 18px; cursor: pointer; }   /* flèche : on voit que c'est une liste déroulante */
 </style>
 </head>
 <body>
@@ -922,7 +940,7 @@
     scheduleSync(800); saveLocal(); paintAccount();
     return true;
   }
-  const normProfile = (p) => ({ id: p.id, name: String(p.name || "Profil"), avatar: typeof p.avatar === "string" ? p.avatar : null, notes: p.notes && typeof p.notes === "object" && !Array.isArray(p.notes) ? p.notes : {}, goal: Number.isInteger(p.goal) && p.goal >= 1 && p.goal <= 7 ? p.goal : null, custom: Array.isArray(p.custom) ? p.custom : [], photos: p.photos && typeof p.photos === "object" ? p.photos : {}, plan: Array.isArray(p.plan) ? p.plan : [], history: Array.isArray(p.history) ? p.history : [], sessions: Array.isArray(p.sessions) ? p.sessions.filter((x) => x && x.id && Array.isArray(x.ids)) : [], game: p.game && typeof p.game === "object" && !Array.isArray(p.game) ? p.game : null });
+  const normProfile = (p) => ({ id: p.id, name: String(p.name || "Profil"), avatar: typeof p.avatar === "string" ? p.avatar : null, notes: p.notes && typeof p.notes === "object" && !Array.isArray(p.notes) ? p.notes : {}, goal: Number.isInteger(p.goal) && p.goal >= 1 && p.goal <= 7 ? p.goal : null, custom: Array.isArray(p.custom) ? p.custom : [], photos: p.photos && typeof p.photos === "object" ? p.photos : {}, plan: Array.isArray(p.plan) ? p.plan : [], history: Array.isArray(p.history) ? p.history : [], sessions: Array.isArray(p.sessions) ? p.sessions.filter((x) => x && x.id && Array.isArray(x.ids)) : [], game: p.game && typeof p.game === "object" && !Array.isArray(p.game) ? p.game : null, body: cleanBody(p.body) });
   D.profiles = D.profiles.filter((p) => p && p.id).map(normProfile);
   D.sync = D.sync && D.sync.profiles ? D.sync : { owner: null, profiles: {}, pt: {}, del: [] };
   D.sync.pt = D.sync.pt || {}; D.sync.del = D.sync.del || [];
@@ -1457,6 +1475,7 @@
     const rec = { date: S.sessionStart, presence, ex, rest, other, sets: S.sets, vol, items, name: S.name || null };
     const p = D.profiles.find((x) => x.id === S.pid);
     if (p) {
+      { const bb = bodyOf(p); rec.kg = bb.kg || KCAL.DEFAULT_KG; rec.kt = bb.tread; rec.kcal = sessionKcal(rec, rec.kg, rec.kt).total; }   // estimation figée avec la séance
       const before = gameStats(p); p.history.push(rec); p.plan = [];
       const res = settleGame(p), pa = res.st.parts.get(rec) || sessionParts(res.st.hist, rec, false);
       markSeen(p, res.fresh);
@@ -1482,6 +1501,7 @@
     rows.forEach(([label, ms, note, main]) => {
       el.summaryList.append(h("div", { class: "summary-row" + (main ? " main" : "") }, h("span", { text: label }), h("strong", { text: fmtLong(ms) }), h("small", { text: note })));
     });
+    { const pk = prof(), kc = kcalInfo(pk, r); el.summaryList.append(h("div", { class: "summary-row kcal" }, h("span", { text: "Calories estimées" }), h("strong", { text: "≈ " + fmtInt(kc.total) + " kcal" }), h("small", { text: kcalNote(kc, pk) }))); }
     if (r.items && r.items.length) {
       const pr = prof(); const hs = pr ? pr.history.slice().sort((a, b) => a.date - b.date) : [];
       const rids = recordIds(hs, r);
@@ -1540,6 +1560,39 @@
   sc.note.addEventListener("click", () => { const c = getCurEx(); if (c) openNoteEditor(c); });
   const parseNum = (v) => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n >= 0 ? n : 0; };
   /* ---------- Séries déjà faites pendant la séance (visibles sans attendre la fin) ---------- */
+  /* KCAL-PURE-BEGIN */
+  // Estimation des calories : dépense = MET × poids (kg) × durée (h). MET = équivalent métabolique (valeurs arrondies du Compendium des activités physiques).
+  const KCAL = { DEFAULT_KG: 70, strength: 6.0, rest: 2.0, whole: 3.5, tread: { marche: 3.5, rapide: 5.0, course: 9.0 }, stair: 8.8, elliptical: 5.0, cardio: 6.0 };
+  const isCardioCat = (cat) => /^Cardio/.test(cat || "");
+  function cardioMet(name, tread) {
+    const n = String(name || "").toLowerCase();
+    if (/tapis/.test(n)) return KCAL.tread[tread] || KCAL.tread.rapide;
+    if (/stair|escalier/.test(n)) return KCAL.stair;
+    if (/ellip/.test(n)) return KCAL.elliptical;
+    return KCAL.cardio;
+  }
+  const kcalFor = (met, kg, ms) => met * kg * (Math.max(0, ms || 0) / 3600000);
+  // séance : séries de musculation à 6 MET (temps réel des séries), cardio selon la machine, repos et temps non comptabilisé à 2 MET ;
+  // sans temps détaillés (séance ajoutée à la main) : 3,5 MET sur toute la durée de présence
+  function sessionKcal(rec, kg, tread) {
+    kg = Number.isFinite(kg) && kg > 0 ? kg : KCAL.DEFAULT_KG;
+    let strength = 0, cardio = 0, active = 0;
+    (rec.items || []).forEach((it) => {
+      const ms = (it.log || []).reduce((a, x) => a + (x.ms || 0), 0); active += ms;
+      if (isCardioCat(it.cat)) cardio += kcalFor(cardioMet(it.name, tread), kg, ms); else strength += kcalFor(KCAL.strength, kg, ms);
+    });
+    if (!((rec.ex || 0) > 0 || active > 0)) return { total: Math.round(kcalFor(KCAL.whole, kg, rec.presence || 0)), strength: 0, cardio: 0, rest: 0, kg, detailed: false };
+    const rest = kcalFor(KCAL.rest, kg, (rec.rest || 0) + (rec.other || 0));
+    return { total: Math.round(strength + cardio + rest), strength: Math.round(strength), cardio: Math.round(cardio), rest: Math.round(rest), kg, detailed: true };
+  }
+  /* KCAL-PURE-END */
+  const TREAD_LABEL = { marche: "Marche", rapide: "Marche rapide", course: "Course" };
+  function cleanBody(b) { return b && typeof b === "object" && !Array.isArray(b) ? { kg: Number.isFinite(b.kg) && b.kg > 0 ? Math.min(300, b.kg) : null, tread: ["marche", "rapide", "course"].indexOf(b.tread) >= 0 ? b.tread : null, at: Number.isFinite(b.at) ? b.at : 0 } : null; }   // (function : utilisable dès le démarrage)
+  const bodyOf = (p) => { const b = p && cleanBody(p.body); return { kg: b && b.kg ? b.kg : null, tread: (b && b.tread) || "rapide" }; };
+  // calories d'une séance (poids et allure du tapis mémorisés avec la séance quand ils existent)
+  function kcalInfo(p, r) { const b = bodyOf(p); return sessionKcal(r, r.kg > 0 ? r.kg : b.kg, r.kt || b.tread); }
+  const kcalNote = (kc, p) => (kc.detailed ? "Séries " + kc.strength + (kc.cardio ? " · cardio " + kc.cardio : "") + " · repos " + kc.rest + " kcal" : "Calculé sur la durée de la séance") + " · poids " + kc.kg + " kg" + (bodyOf(p).kg ? "" : " (par défaut : à régler dans Profil)");
+  function kcalRows(r) { const p = prof(), kc = kcalInfo(p, r); return h("div", null, kv("Calories estimées", "≈ " + fmtInt(kc.total) + " kcal"), h("p", { class: "muted small", style: "margin:2px 0 8px", text: kcalNote(kc, p) })); }
   /* DURATION-PURE-BEGIN */
   // Correction de la durée d'une série (en ms), sans limite :
   //  - raccourcir : le temps retiré va au REPOS (la durée de la séance ne change pas) ;
@@ -1719,7 +1772,7 @@
   /* ---------- Poids / répétitions avec boutons − / + (le poids a aussi −5 / +5) ---------- */
   function stepperEl(obj, key, label, step, opts) {
     const after = (opts && opts.after) || (() => {});
-    const isW = key === "w", unit = (opts && opts.unit) || "répétition", qs = (opts && opts.quickStep) || 5;
+    const isW = key === "w" || !!(opts && opts.dec), unit = (opts && opts.unit) || "répétition", qs = (opts && opts.quickStep) || 5;
     const inp = h("input", { type: "number", inputmode: isW ? "decimal" : "numeric", min: "0", step: isW ? "0.5" : "1", "aria-label": label, value: String(obj[key]) });
     inp.value = String(obj[key]);
     const put = (v) => { obj[key] = !isW ? Math.max(0, Math.round(v)) : Math.max(0, Math.round(v * 100) / 100); inp.value = String(obj[key]); after(); };
@@ -1758,6 +1811,7 @@
       }
       const nm = (draft.name || "").trim().replace(/\s+/g, " ");
       const rec = { date: start, presence: end - start, ex: 0, rest: 0, other: end - start, sets: items.reduce((a, x) => a + x.sets, 0), vol: items.reduce((a, x) => a + x.vol, 0), items, name: nm || null, manual: true };
+      { const bb = bodyOf(p); rec.kg = bb.kg || KCAL.DEFAULT_KG; rec.kt = bb.tread; rec.kcal = sessionKcal(rec, rec.kg, rec.kt).total; }
       p.history.push(rec); p.history.sort((a, b) => a.date - b.date);
       const res = settleGame(p), pa = res.st.parts.get(rec); saveData(); renderGoalBar(); closeSheet();
       if (res.fresh.length) openCelebration(res.fresh); else toast("Séance ajoutée · +" + (pa ? pa.total : 0) + " pts");
@@ -1993,6 +2047,17 @@
     openSheet("Avatar de " + pr.name, [h("div", { class: "stack" }, grid, none)]);
   }
 
+  // réglages pour l'estimation des calories : poids du corps et allure sur le tapis
+  function bodyCard(p) {
+    const b0 = bodyOf(p), obj = { kg: b0.kg || 0 }; let tread = b0.tread;
+    const save = () => { p.body = { kg: obj.kg > 0 ? obj.kg : null, tread, at: Date.now() }; saveData(); };
+    const opts = h("div", { class: "opt3", role: "group", "aria-label": "Allure sur le tapis" });
+    const paint = () => { opts.replaceChildren(...Object.keys(TREAD_LABEL).map((k) => h("button", { type: "button", class: k === tread ? "on" : "", "aria-pressed": k === tread ? "true" : "false", onclick: () => { tread = k; save(); paint(); } }, TREAD_LABEL[k]))); }; paint();
+    return h("section", { class: "card", id: "bodyCard" }, h("h3", { text: "Calories estimées" }),
+      h("p", { class: "muted small", style: "margin:-4px 0 10px", text: "Une estimation indicative, calculée avec ton poids, tes exercices, tes séries et le temps passé. Elle apparaît dans le bilan et l’historique de tes séances." }),
+      h("div", { class: "sc-f" }, h("label", { text: "TON POIDS (kg)" }), stepperEl(obj, "kg", "Poids de corps (kg)", 1, { dec: true, quick: true, after: save }), h("small", { class: "muted", style: "display:block;margin-top:6px", text: b0.kg ? "Poids enregistré." : "Sans poids renseigné, l’appli utilise " + KCAL.DEFAULT_KG + " kg." })),
+      h("div", { class: "sc-f", style: "margin-top:12px" }, h("label", { text: "ALLURE SUR LE TAPIS" }), opts, h("small", { class: "muted", style: "display:block;margin-top:6px", text: "Marche ≈ 5 km/h · marche rapide ≈ 6 km/h · course ≈ 9 km/h." })));
+  }
   function renderProfile() {
     const root = $("viewProfile"); root.replaceChildren();
     const p = prof(); if (!p) return;
@@ -2001,6 +2066,7 @@
     root.append(accountCard());
     root.append(pushCard());
     root.append(achievementsCard(p));
+    root.append(bodyCard(p));
     celebFlush();
 
     // Profils
@@ -2036,9 +2102,13 @@
   const svgEl = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); if (text != null) n.textContent = text; return n; };
   const dshort = (ts) => new Date(ts).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 
-  function lineChart(pts, f) {
+  // Courbe d'évolution : trait fin ; on touche (ou on fait glisser le doigt, ou on survole à la souris) pour lire le poids et la date du point le plus proche.
+  // opts.detail(q) → ligne de détail sous la date ; opts.open(q) → lien « Voir la séance ›»
+  function lineChart(pts, f, opts) {
+    opts = opts || {};
     const W = 320, H = 190, L = 46, R = 14, T = 14, B = 30;
-    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Courbe d’évolution", style: "width:100%;height:auto;display:block" });
+    const wrap = h("div", { class: "chartbox" });
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Courbe d’évolution : touchez la courbe pour voir le poids et la date", style: "width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair" });
     const ys = pts.map((q) => q.y);
     let min = Math.min(...ys), max = Math.max(...ys);
     if (min === max) { min = Math.max(0, min - 1); max += 1; }
@@ -2050,15 +2120,86 @@
       svg.append(svgEl("line", { x1: L, x2: W - R, y1: y, y2: y, style: "stroke:var(--line);stroke-width:1" }));
       svg.append(svgEl("text", { x: L - 6, y: y + 3.5, "text-anchor": "end", style: "fill:var(--muted);font-size:10px" }, f(v)));
     });
-    if (pts.length > 1) svg.append(svgEl("path", { d: pts.map((q, i) => (i ? "L" : "M") + px(i).toFixed(1) + " " + py(q.y).toFixed(1)).join(" "), style: "fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round" }));
+    const cursor = svgEl("line", { x1: 0, x2: 0, y1: T, y2: H - B, class: "cur", style: "stroke:var(--dim);stroke-width:1;opacity:0;pointer-events:none" });
+    svg.append(cursor);
+    if (pts.length > 1) svg.append(svgEl("path", { d: pts.map((q, i) => (i ? "L" : "M") + px(i).toFixed(1) + " " + py(q.y).toFixed(1)).join(" "), class: "ln", style: "fill:none;stroke:var(--accent);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;pointer-events:none" }));
     pts.forEach((q, i) => {
-      const c = svgEl("circle", { cx: px(i), cy: py(q.y), r: 4.5, style: "fill:var(--accent);stroke:var(--bg);stroke-width:2" });
+      const c = svgEl("circle", { cx: px(i), cy: py(q.y), r: 3, class: "pt", style: "fill:var(--bg);stroke:var(--accent);stroke-width:1.5;pointer-events:none" });
       c.append(svgEl("title", {}, dshort(q.x) + " : " + f(q.y)));
       svg.append(c);
     });
+    const mark = svgEl("circle", { cx: 0, cy: 0, r: 5, class: "sel", style: "fill:var(--accent);stroke:var(--bg);stroke-width:2;opacity:0;pointer-events:none" });
+    svg.append(mark);
     svg.append(svgEl("text", { x: px(0), y: H - 8, "text-anchor": pts.length === 1 ? "middle" : "start", style: "fill:var(--muted);font-size:10px" }, dshort(pts[0].x)));
     if (pts.length > 1) svg.append(svgEl("text", { x: px(pts.length - 1), y: H - 8, "text-anchor": "end", style: "fill:var(--muted);font-size:10px" }, dshort(pts[pts.length - 1].x)));
-    return svg;
+    // bulle de détail
+    const tVal = h("b", { class: "ct-v" }), tDate = h("span", { class: "ct-d" }), tExtra = h("span", { class: "ct-x" });
+    const tOpen = h("button", { class: "linkbtn ct-o", type: "button" }, "Voir la séance ›");
+    const tip = h("div", { class: "ctip", role: "status", "aria-live": "polite" }, h("div", { class: "ct-r1" }, tVal, tDate), tExtra, opts.open ? tOpen : null); tip.hidden = true;
+    let cur = -1;
+    tOpen.addEventListener("click", () => { if (cur >= 0 && opts.open) opts.open(pts[cur]); });
+    function select(i) {
+      i = Math.max(0, Math.min(pts.length - 1, i)); cur = i; const q = pts[i], x = px(i);
+      cursor.setAttribute("x1", x); cursor.setAttribute("x2", x); cursor.style.opacity = "1";
+      mark.setAttribute("cx", x); mark.setAttribute("cy", py(q.y)); mark.style.opacity = "1";
+      tVal.textContent = f(q.y); tDate.textContent = dateStr(q.x); tExtra.textContent = opts.detail ? opts.detail(q) || "" : "";
+      tip.hidden = false; tip.dataset.i = String(i);
+      try { const w = wrap.getBoundingClientRect().width || 0, tw = tip.offsetWidth || 150; const cx = (x / W) * w; tip.style.left = Math.max(0, Math.min(w - tw, cx - tw / 2)).toFixed(0) + "px"; } catch (e) {}
+    }
+    const nearest = (ev) => { const r = svg.getBoundingClientRect(); const x = ((ev.clientX - r.left) / (r.width || 1)) * W; return pts.length === 1 ? 0 : Math.round(((x - L) / (W - L - R)) * (pts.length - 1)); };
+    let down = false;
+    svg.addEventListener("pointerdown", (ev) => { down = true; try { svg.setPointerCapture(ev.pointerId); } catch (e) {} select(nearest(ev)); });
+    svg.addEventListener("pointermove", (ev) => { if (down || ev.pointerType === "mouse") select(nearest(ev)); });
+    const up = () => { down = false; }; svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+    wrap.append(svg, tip, h("p", { class: "ct-hint", text: "Touchez la courbe pour voir le poids et la date." }));
+    return wrap;
+  }
+
+  // cardio (tapis, escaliers, vélo elliptique) : barres du temps passé à chaque séance, avec le détail au toucher (durée, date, calories estimées)
+  function barChart(pts, f, opts) {
+    opts = opts || {};
+    const W = 320, H = 190, L = 46, R = 14, T = 14, B = 30, n = pts.length;
+    const wrap = h("div", { class: "chartbox" });
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Temps par séance : touchez une barre pour voir la durée et la date", style: "width:100%;height:auto;display:block;touch-action:pan-y;cursor:crosshair" });
+    const hi = Math.max(...pts.map((q) => q.y)) * 1.15 || 1; const py = (y) => T + (1 - y / hi) * (H - T - B);
+    [0, hi / 2, hi].forEach((v) => { const y = py(v); svg.append(svgEl("line", { x1: L, x2: W - R, y1: y, y2: y, style: "stroke:var(--line);stroke-width:1" }), svgEl("text", { x: L - 6, y: y + 3.5, "text-anchor": "end", style: "fill:var(--muted);font-size:10px" }, opts.axis ? opts.axis(v) : f(v))); });
+    const slot = (W - L - R) / n, bw = Math.max(3, Math.min(22, slot * 0.62)), cx = (i) => L + slot * (i + 0.5);
+    const bars = pts.map((q, i) => { const r = svgEl("rect", { x: (cx(i) - bw / 2).toFixed(1), y: py(q.y).toFixed(1), width: bw.toFixed(1), height: Math.max(1, H - B - py(q.y)).toFixed(1), rx: 2, class: "bar", style: "fill:var(--accent);opacity:.55;pointer-events:none" }); svg.append(r); return r; });
+    svg.append(svgEl("text", { x: L, y: H - 8, "text-anchor": "start", style: "fill:var(--muted);font-size:10px" }, dshort(pts[0].x)));
+    if (n > 1) svg.append(svgEl("text", { x: W - R, y: H - 8, "text-anchor": "end", style: "fill:var(--muted);font-size:10px" }, dshort(pts[n - 1].x)));
+    const tVal = h("b", { class: "ct-v" }), tDate = h("span", { class: "ct-d" }), tExtra = h("span", { class: "ct-x" });
+    const tOpen = h("button", { class: "linkbtn ct-o", type: "button" }, "Voir la séance ›");
+    const tip = h("div", { class: "ctip", role: "status", "aria-live": "polite" }, h("div", { class: "ct-r1" }, tVal, tDate), tExtra, opts.open ? tOpen : null); tip.hidden = true;
+    let cur = -1; tOpen.addEventListener("click", () => { if (cur >= 0 && opts.open) opts.open(pts[cur]); });
+    function select(i) {
+      i = Math.max(0, Math.min(n - 1, i)); cur = i; const q = pts[i];
+      bars.forEach((b, k) => { b.style.opacity = k === i ? "1" : ".55"; });
+      tVal.textContent = f(q.y); tDate.textContent = dateStr(q.x); tExtra.textContent = opts.detail ? opts.detail(q) || "" : ""; tip.hidden = false; tip.dataset.i = String(i);
+      try { const w = wrap.getBoundingClientRect().width || 0, tw = tip.offsetWidth || 150; tip.style.left = Math.max(0, Math.min(w - tw, (cx(i) / W) * w - tw / 2)).toFixed(0) + "px"; } catch (e) {}
+    }
+    const nearest = (ev) => { const r = svg.getBoundingClientRect(); const x = ((ev.clientX - r.left) / (r.width || 1)) * W; return Math.floor((x - L) / slot); };
+    let down = false;
+    svg.addEventListener("pointerdown", (ev) => { down = true; try { svg.setPointerCapture(ev.pointerId); } catch (e) {} select(nearest(ev)); });
+    svg.addEventListener("pointermove", (ev) => { if (down || ev.pointerType === "mouse") select(nearest(ev)); });
+    const up = () => { down = false; }; svg.addEventListener("pointerup", up); svg.addEventListener("pointercancel", up);
+    wrap.append(svg, tip, h("p", { class: "ct-hint", text: "Touchez une barre pour voir la durée et la date." }));
+    return wrap;
+  }
+  function cardioBlock(card, ser, info) {
+    const pk = prof(), b = bodyOf(pk); const isTread = /tapis/i.test((info && info.name) || "") || /tapis/i.test((info && info.cat) || "");
+    const list = ser.filter((x) => x.ms > 0), shown = list.slice(-24);
+    card.append(h("p", { class: "ch-t", text: isTread ? "Temps de marche sur le tapis" : "Temps passé sur l’exercice" }));
+    if (!shown.length) { card.append(h("p", { class: "muted small", text: "Aucune durée enregistrée pour cet exercice." })); return; }
+    const kg = b.kg || KCAL.DEFAULT_KG, met = cardioMet(info && info.name, b.tread);
+    const axis = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? Math.round(ms / 1000) + " s" : m + " min"; };
+    card.append(h("div", { class: "chart" }, barChart(shown.map((x) => ({ x: x.date, y: x.ms, sets: x.log.length })), (ms) => fmtLong(ms), {
+      axis,
+      detail: (q) => "≈ " + fmtInt(Math.round(kcalFor(met, kg, q.y))) + " kcal estimées",
+      open: (q) => { try { const e = document.querySelector('.exb[data-ts="' + q.x + '"]'); if (e) { e.scrollIntoView({ behavior: "smooth", block: "center" }); e.classList.add("flash"); setTimeout(() => e.classList.remove("flash"), 1700); } } catch (err) {} }
+    })));
+    const total = list.reduce((a, x) => a + x.ms, 0), best = Math.max(...list.map((x) => x.ms)), wk0 = weekStartOf(Date.now()), wk = list.filter((x) => x.date >= wk0).reduce((a, x) => a + x.ms, 0);
+    card.append(h("p", { class: "cap" }, "Total : ", h("b", { text: fmtLong(total) }), " · Moyenne : ", h("b", { text: fmtLong(total / list.length) }), " · Record : ", h("b", { text: fmtLong(best) }), wk ? " · Cette semaine : " : "", wk ? h("b", { text: fmtLong(wk) }) : "", " · ≈ ", h("b", { text: fmtInt(Math.round(kcalFor(met, kg, total))) + " kcal" }), " au total"));
+    if (list.length > shown.length) card.append(h("p", { class: "muted small", style: "margin:4px 0 0", text: "Le graphique montre les " + shown.length + " dernières séances." }));
   }
 
   const MET = {
@@ -2100,6 +2241,7 @@
       const body = h("div", { class: "hb" }, kv("Début", hhmm(r.date)), kv("Fin", hhmm(r.date + (r.presence || 0))), kv("Présence", fmtLong(r.presence)));
       if (r.manual) body.append(h("p", { class: "muted small", style: "margin:6px 0 2px", text: "Séance ajoutée à la main : le détail du temps d’exercice et de repos n’est pas disponible." }));
       else body.append(kv("Exercice", fmtLong(r.ex)), kv("Repos", fmtLong(r.rest)), kv("Non comptabilisé", fmtLong(r.other)));
+      body.append(kcalRows(r));
       body.append(compareEl(hist, r));
       body.append(ui.confirm === delKey
         ? h("button", { class: "btn mini danger", type: "button", onclick: () => { const i = p.history.indexOf(r); if (i >= 0) p.history.splice(i, 1); ui.confirm = null; saveData(); renderGoalBar(); rerender(); } }, "Confirmer la suppression")
@@ -2135,7 +2277,7 @@
   // ligne de résumé d'une séance : titre, durée, et une rangée de miniatures des exercices faits
   function histSummary(hist, r) {
     const th = (r.items || []).filter((it) => it.log && it.log.length).map(histThumb).filter(Boolean);
-    const sm = h("summary", null, h("b", null, h("span", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "hs-t", text: timeRange(r) }), r.manual ? h("span", { class: "hs-t", text: "✎ ajoutée à la main" }) : null), h("span", { class: "muted", text: fmt(r.presence) + " · " + plural(r.sets, "série") + (recordIds(hist, r).size ? " · ★ " + recordIds(hist, r).size : "") }));
+    const sm = h("summary", null, h("b", null, h("span", { text: (r.name ? r.name + " · " : "") + dateStr(r.date) }), h("span", { class: "hs-t", text: timeRange(r) }), r.manual ? h("span", { class: "hs-t", text: "✎ ajoutée à la main" }) : null), h("span", { class: "muted hs-m", text: fmt(r.presence) + " · " + plural(r.sets, "série") + " · ≈ " + fmtInt(kcalInfo(prof(), r).total) + " kcal" + (recordIds(hist, r).size ? " · ★ " + recordIds(hist, r).size : "") }));
     if (th.length) {
       const MAX = 7; const strip = h("div", { class: "minis" }, th.slice(0, MAX));
       if (th.length > MAX) strip.append(h("span", { class: "more", text: "+" + (th.length - MAX) }));
@@ -2255,7 +2397,7 @@
   function progEx(root, hist) {
     const st = ui.prog; const map = new Map();
     hist.forEach((r) => (r.items || []).forEach((it) => {
-      if (it.id && it.log && it.log.length) { const m = map.get(it.id) || { id: it.id, name: it.name, n: 0, last: 0 }; m.n++; m.last = r.date; m.name = it.name; map.set(it.id, m); }
+      if (it.id && it.log && it.log.length) { const m = map.get(it.id) || { id: it.id, name: it.name, n: 0, last: 0 }; m.n++; m.last = r.date; m.name = it.name; m.cat = it.cat || m.cat; map.set(it.id, m); }
     }));
     const list = [...map.values()].sort((a, b) => b.last - a.last);
     if (!list.length) {
@@ -2269,11 +2411,16 @@
     const key = ser.some((x) => x.maxW > 0) ? "maxW" : ser.some((x) => x.maxR > 0) ? "maxR" : "ms"; // le poids, sinon répétitions, sinon durée
     const met = MET[key];
     const vals = ser.map((x) => x[key]);
-    const card = h("section", { class: "card" }, h("h3", { text: "Évolution par exercice" }), sel);
-    if (key !== "maxW") card.append(h("p", { class: "muted small", style: "margin:10px 0 0", text: key === "maxR" ? "Aucun poids enregistré : évolution des répétitions." : "Aucun poids ni répétition : évolution de la durée." }));
-    if (!vals.some((v) => v > 0)) card.append(h("p", { class: "muted small", text: "Pas de données pour cette mesure sur cet exercice." }));
+    const cardioEx = isCardioCat((map.get(st.exId) || {}).cat);
+    const card = h("section", { class: "card" }, h("h3", { text: "Évolution par exercice" }), h("div", { class: "selwrap" }, sel));
+    if (key !== "maxW" && !cardioEx) card.append(h("p", { class: "muted small", style: "margin:10px 0 0", text: key === "maxR" ? "Aucun poids enregistré : évolution des répétitions." : "Aucun poids ni répétition : évolution de la durée." }));
+    if (cardioEx) cardioBlock(card, ser, map.get(st.exId));
+    else if (!vals.some((v) => v > 0)) card.append(h("p", { class: "muted small", text: "Pas de données pour cette mesure sur cet exercice." }));
     else {
-      card.append(h("div", { class: "chart" }, lineChart(ser.map((x) => ({ x: x.date, y: x[key] })), (v) => met.f(v))));
+      card.append(h("div", { class: "chart" }, lineChart(ser.map((x) => { const best = x.log.reduce((m, y) => (key === "maxR" ? (y.r || 0) > (m.r || 0) : (y.w || 0) > (m.w || 0)) ? y : m, x.log[0]); return { x: x.date, y: x[key], sets: x.log.length, best }; }), (v) => met.f(v), {
+        detail: (q) => plural(q.sets, "série") + (q.best && (q.best.w > 0 || q.best.r > 0) ? " · meilleure : " + pairText(q.best) : ""),
+        open: (q) => { try { const e = document.querySelector('.exb[data-ts="' + q.x + '"]'); if (e) { e.scrollIntoView({ behavior: "smooth", block: "center" }); e.classList.add("flash"); setTimeout(() => e.classList.remove("flash"), 1700); } } catch (err) {} }
+      })));
       const first = vals[0], last = vals[vals.length - 1], diff = last - first;
       const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
       card.append(h("p", { class: "cap" }, "Record : ", h("b", { text: met.f(Math.max(...vals)) }), ser.length > 1 ? " · Évolution depuis le " + dshort(ser[0].date) + " : " : "", ser.length > 1 ? h("b", { text: sign + met.f(Math.abs(diff)) }) : ""));
@@ -2281,7 +2428,7 @@
     root.append(card);
     const tab = h("section", { class: "card" }, h("h3", { text: "Séances · " + (map.get(st.exId) || {}).name }));
     ser.slice().reverse().forEach((x) => {
-      tab.append(h("div", { class: "exb", style: "margin-bottom:10px" }, h("div", { class: "kv" }, h("b", { text: dateStr(x.date) }), h("span", { class: "muted", text: x.maxW > 0 ? "Max " + fmtNum(x.maxW) + " kg" : fmt(x.ms) })), x.log.map((s2, i) => h("div", { class: "setl", text: setLine(s2, i) }))));
+      tab.append(h("div", { class: "exb", "data-ts": String(x.date), style: "margin-bottom:10px" }, h("div", { class: "kv" }, h("b", { text: dateStr(x.date) }), h("span", { class: "muted", text: x.maxW > 0 ? "Max " + fmtNum(x.maxW) + " kg" : fmt(x.ms) })), x.log.map((s2, i) => h("div", { class: "setl", text: setLine(s2, i) }))));
     });
     root.append(tab);
   }
@@ -2570,10 +2717,11 @@
     const syn = h("section", { class: "card", id: "wkSyn" }, h("h3", { text: "Séances de la semaine · comparaison avec la précédente" }));
     if (!inWeek.length) syn.append(h("p", { class: "muted", style: "margin:0", text: "Aucune séance cette semaine." }));
     else {
+      { const pk = prof(), tot = inWeek.reduce((a, r) => a + kcalInfo(pk, r).total, 0); syn.append(h("div", { class: "wk-kcal" }, h("span", { text: "Cette semaine" }), h("b", { text: plural(inWeek.length, "séance") + " · ≈ " + fmtInt(tot) + " kcal" }))); }
       syn.append(h("p", { class: "muted small", style: "margin:-4px 2px 10px", text: "Touchez une séance pour déplier ses séries." }));
       inWeek.slice().reverse().forEach((r, k) => {
         const d = h("details", { class: "hist" }, histSummary(hist, r),
-          h("div", { class: "hb" }, compareEl(hist, r)));
+          h("div", { class: "hb" }, kcalRows(r), compareEl(hist, r)));
         if (k === 0) d.open = true;
         syn.append(d);
       });
@@ -2591,7 +2739,7 @@
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "13 nov. 2026 · 16:46 · 5b2f40"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "13 nov. 2026 · 17:41 · a20e4d"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
@@ -2613,7 +2761,7 @@
     if (!who || !boot.ready) return; // pendant le chargement, on n'écrase pas la copie existante
     try {
       localOk = lsSet(LOCAL_KEY, JSON.stringify({ v: 2, owner: who.key, at: Date.now(), current: D.current, sync: { profiles: D.sync.profiles, del: D.sync.del },
-        profiles: D.profiles.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history })),
+        profiles: D.profiles.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, body: p.body || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history })),
         live: S && S.sessionStart ? S : null })) !== false;
     } catch (e) { localOk = false; }
   }
@@ -2758,8 +2906,8 @@
   }
 
   /* ---------- Contenu synchronisé d’un profil ---------- */
-  const contentOf = (p) => JSON.stringify({ name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
-  const dataOf = (p) => ({ avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
+  const contentOf = (p) => JSON.stringify({ name: p.name, avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, body: p.body || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
+  const dataOf = (p) => ({ avatar: p.avatar || null, notes: p.notes || {}, goal: p.goal || null, game: p.game || null, body: p.body || null, custom: p.custom, plan: p.plan, sessions: p.sessions, history: p.history, live: liveOf(p) });
   // badges : on garde la date d'obtention la plus ancienne ; le record de points, le plus haut ; jamais de retrait
   function mergeGame(a, b) {
     const ok = (x) => (x && typeof x === "object" && !Array.isArray(x) ? x : {}); a = ok(a); b = ok(b); const badges = {};
@@ -2774,13 +2922,14 @@
     p.notes = Object.assign({}, d.notes && typeof d.notes === "object" ? d.notes : {}, p.notes || {}); // en cas de conflit, la note écrite ici l'emporte
     p.goal = p.goal || (Number.isInteger(d.goal) ? d.goal : null);
     p.game = mergeGame(p.game, d.game);
+    { const a = cleanBody(p.body), b2 = cleanBody(d.body); p.body = a && b2 ? (b2.at > a.at ? b2 : a) : a || b2 || null; }   // poids et allure du tapis : le réglage le plus récent gagne
     p.custom = union(p.custom, d.custom, "id");
     p.sessions = union(p.sessions, d.sessions, "id");
     p.history = union(p.history, d.history, "date").sort((x, y) => x.date - y.date);
   }
   function applyServer(p, sr) {
     const d = sr.data || {};
-    p.name = sr.name || p.name; p.avatar = typeof d.avatar === "string" ? d.avatar : null; p.notes = d.notes && typeof d.notes === "object" && !Array.isArray(d.notes) ? d.notes : {}; p.goal = Number.isInteger(d.goal) ? d.goal : null; p.game = d.game && typeof d.game === "object" && !Array.isArray(d.game) ? d.game : null; p.custom = d.custom || []; p.sessions = d.sessions || []; p.history = d.history || [];
+    p.name = sr.name || p.name; p.avatar = typeof d.avatar === "string" ? d.avatar : null; p.notes = d.notes && typeof d.notes === "object" && !Array.isArray(d.notes) ? d.notes : {}; p.goal = Number.isInteger(d.goal) ? d.goal : null; p.game = d.game && typeof d.game === "object" && !Array.isArray(d.game) ? d.game : null; p.body = cleanBody(d.body); p.custom = d.custom || []; p.sessions = d.sessions || []; p.history = d.history || [];
     if (!(sessionActive() && S.pid === p.id)) p.plan = d.plan || [];
     restoreLive(p, d.live);
   }
