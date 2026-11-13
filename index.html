@@ -245,6 +245,7 @@
   .sx-exh .cmp-name { margin: 0; gap: 12px; min-width: 0; align-items: center; } .sx-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; } .sx-exh .cmp-name .thumb { width: 52px; height: 52px; border-radius: 13px; flex: none; }
   .sx-en { display: grid; gap: 2px; min-width: 0; } .sx-en b { font-size: .98rem; line-height: 1.2; color: #fff; } .sx-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0; } .sx-sub span { font-size: .78rem; color: var(--muted); font-weight: 600; } .sx-sub .rec { display: inline; margin: 0; padding: 0; border: 0; background: none; color: var(--accent); font-weight: 800; font-size: .76rem; }
   .sx-nb { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 3px 8px 3px 10px; border-radius: 999px; background: rgba(205,240,120,.14); border: 1px solid rgba(205,240,120,.5); color: var(--accent); font-weight: 800; font-size: .76rem; white-space: nowrap; }
+  .sx-nb { padding: 3px 6px 3px 10px; } .sx-chev.w { color: #fff; } .sx-chev.w svg { stroke-width: 3; }
   .sx-exb { padding: 0 12px 12px; } .sx-main { min-width: 0; }
   .sx-tbl { border-radius: 14px; background: rgba(8,13,22,.4); padding: 4px 10px; }
   .sx-tr { display: grid; grid-template-columns: 22px 1.3fr 0.9fr 24px; gap: 10px; align-items: center; padding: 9px 0; font-size: .92rem; font-variant-numeric: tabular-nums; border-top: 1px solid rgba(255,255,255,.07); } .sx-tr:first-child { border-top: 0; }
@@ -2301,7 +2302,7 @@ details.hist[open] { border-color: rgba(205,240,120,.5); background: rgba(205,24
     const sum = h("summary", { class: "sx-exh" },
       h("div", { class: "cmp-name" }, histThumb(it), h("div", { class: "sx-en" }, h("b", { text: it.name }))),
       h("div", { class: "sx-meta" }, h("div", { class: "sx-sub" }, cardioEx ? null : bodyFigure(cat, true), h("span", { text: cat || "Exercice" }), recs.has(it.id) ? h("span", { class: "rec", text: "★ Record" }) : null),
-        h("span", { class: "sx-nb" }, h("span", { text: plural(it.log.length, "série") }), h("span", { class: "sx-chev" }, ico("chevron", 16)))));
+        h("span", { class: "sx-nb" }, h("span", { text: plural(it.log.length, "série") }), h("span", { class: "sx-chev w" }, ico("chevron", 24)))));
     const tbl = h("div", { class: "sx-tbl" }, h("div", { class: "sx-tr head" }, h("span", { class: "n", text: "#" }), cardio ? h("span", { class: "w" }, ico("clock", 14), "Durée") : h("span", { class: "w" }, ico("dumbbell", 14), "Poids"), cardio ? h("span") : h("span", { class: "r" }, ico("repeat", 14), "Rép."), h("span", { class: "k" })));
     it.log.forEach((c, i) => {
       const q = prev ? prev[i] : null, d = c && q && !cardio ? deltaOf(c, q) : null;
@@ -2341,7 +2342,7 @@ details.hist[open] { border-color: rgba(205,240,120,.5); background: rgba(205,24
     head.append(h("span", { class: "sx-chev big" }, ico("chevron", 22)));
     const body = h("div", { class: "sx-body" });
     if (!items.length) body.append(h("p", { class: "muted small", style: "margin:4px 0", text: "Aucune série enregistrée pour cette séance." }));
-    items.forEach((it, k) => body.append(exCard(hist, r, it, recs, k === 0)));
+    items.forEach((it, k) => body.append(exCard(hist, r, it, recs, false)));
     const delKey = "h:" + r.date; const sb = h("div", { class: "sx-sumb" }, kv("Début", hhmm(r.date)), kv("Fin", hhmm(r.date + (r.presence || 0))), kv("Présence", fmtLong(r.presence)));
     if (r.manual) sb.append(h("p", { class: "muted small", style: "margin:6px 0 2px", text: "Séance ajoutée à la main : le détail du temps d’exercice et de repos n’est pas disponible." }));
     else sb.append(kv("Exercice", fmtLong(r.ex)), kv("Repos", fmtLong(r.rest)), kv("Non comptabilisé", fmtLong(r.other)));
@@ -2822,16 +2823,10 @@ details.hist[open] { border-color: rgba(205,240,120,.5); background: rgba(205,24
         h("button", { class: "wkb", type: "button", "aria-label": "Semaine précédente", disabled: ws <= oldest, onclick: () => go(shiftWeek(ws, -1)) }, "‹"),
         sel,
         h("button", { class: "wkb", type: "button", "aria-label": "Semaine suivante", disabled: ws >= newest, onclick: () => go(shiftWeek(ws, 1)) }, "›"))));
-    const syn = h("section", { class: "card", id: "wkSyn" }, h("h3", { text: "Séances de la semaine · comparaison avec la précédente" }));
+    const syn = h("section", { class: "card", id: "wkSyn" }, h("h3", { text: "Bilan de la semaine · comparaison avec la précédente" }));
     if (!inWeek.length) syn.append(h("p", { class: "muted", style: "margin:0", text: "Aucune séance cette semaine." }));
     else {
       { const pk = prof(), tot = inWeek.reduce((a, r) => a + kcalInfo(pk, r).total, 0); syn.append(h("div", { class: "wk-kcal" }, h("span", { text: "Cette semaine" }), h("b", { text: plural(inWeek.length, "séance") + " · ≈ " + fmtInt(tot) + " kcal" }))); }
-      syn.append(h("p", { class: "muted small", style: "margin:-4px 2px 10px", text: "Touchez une séance pour déplier ses séries." }));
-      inWeek.slice().reverse().forEach((r, k) => {
-        const d = sessionCard(hist, r, {});
-        if (k === 0) d.open = true;
-        syn.append(d);
-      });
     }
     syn.append(h("button", { class: "btn block", type: "button", style: "margin-top:12px", onclick: () => { ui.list.seg = "done"; setTab("list"); } }, "Voir toutes les séances"));
     root.append(syn);
@@ -2846,7 +2841,7 @@ details.hist[open] { border-color: rgba(205,240,120,.5); background: rgba(205,24
      L’adresse et la clé « publishable » sont faites pour être visibles dans une page.
      ===================================================================== */
   const SB = { url: "https://mmkrzwmezowkxjxkongu.supabase.co", key: "sb_publishable_XLf204CBXeRKZ2fZucK3zA_dhSAcaOi" };
-  const APP_VERSION = "13 nov. 2026 · 22:54 · 32bdb7"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
+  const APP_VERSION = "14 nov. 2026 · 00:04 · 9e4291"; // numéro de version, rempli à la fabrication : permet de vérifier quelle version est réellement affichée
   const WHO_KEY = "tempo-who-v1";
   let who = (() => {
     try { const o = JSON.parse(lsGet(WHO_KEY) || "null"); if (o && o.key && o.name) return o; } catch (e) {}
